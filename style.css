@@ -1,0 +1,41 @@
+body {
+    margin: 0;
+    padding: 0;
+    background-color: #efe7db;
+    font-family: Arial, sans-serif;
+  }
+  
+  .planner {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+  }
+  
+  h1 {
+    text-align: center;
+    color: #5a8619;
+    font-size: 2.5em;
+    font-weight: 900;
+    margin-top: 30px;
+    text-transform: uppercase;
+  }
+  
+  .leaf {
+    position: absolute;
+    width: 300px;
+    transform: scale(1);
+    z-index: 1;
+  }
+  
+  .top-left {
+    top: 0;
+    left: 0;
+  }
+  
+  .bottom-right {
+    bottom: 0;
+    right: 0;
+    transform: scaleX(-1);
+  }
+  

@@ -1,0 +1,1168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feathers of Memory</title>
+    <style>
+        :root {
+            --primary-color: #5c7cfa;
+            --secondary-color: #748ffc;
+            --background-color: #2b3035;
+            --text-color: #f8f9fa;
+            --accent-color: #ffd43b;
+            --danger-color: #fa5252;
+            --success-color: #51cf66;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            transition: background-color 0.3s ease;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            padding: 2rem;
+            position: relative;
+        }
+
+        .game-title {
+            text-align: center;
+            margin-bottom: 2rem;
+            font-size: 2.5rem;
+            color: var(--accent-color);
+        }
+
+        .game-area {
+            position: relative;
+            width: 100%;
+            height: 400px;
+            background-image: linear-gradient(to bottom, #34495e, #2c3e50);
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .scene {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding: 2rem;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        .scene.active {
+            opacity: 1;
+        }
+
+        .forest-scene {
+            background-image: url('/api/placeholder/800/400');
+        }
+
+        .lake-scene {
+            background-image: url('/api/placeholder/800/400');
+        }
+
+        .dialogue-box {
+            background-color: rgba(0, 0, 0, 0.7);
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            width: 100%;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .character {
+            font-weight: bold;
+            color: var(--accent-color);
+        }
+
+        .options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .option-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            flex-grow: 1;
+            min-width: 150px;
+            transition: all 0.2s ease;
+        }
+
+        .option-btn:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+
+        .puzzle-container {
+            background-color: rgba(0, 0, 0, 0.7);
+            border-radius: 10px;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .puzzle-title {
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .feather-puzzle {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 1rem;
+        }
+
+        .feather {
+            width: 60px;
+            height: 150px;
+            background-color: #e0e0e0;
+            clip-path: polygon(50% 0%, 90% 20%, 100% 60%, 75% 100%, 25% 100%, 0% 60%, 10% 20%);
+            cursor: grab;
+            transition: all 0.2s ease;
+        }
+
+        .feather:hover {
+            transform: translateY(-5px);
+        }
+
+        .feather.blue { background-color: #74b9ff; }
+        .feather.red { background-color: #ff7675; }
+        .feather.green { background-color: #55efc4; }
+        .feather.yellow { background-color: #ffeaa7; }
+
+        .memory-journal {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: rgba(0, 0, 0, 0.7);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1.5rem;
+            transition: all 0.2s ease;
+        }
+
+        .memory-journal:hover {
+            transform: scale(1.1);
+            background-color: var(--accent-color);
+            color: var(--background-color);
+        }
+
+        .journal-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .journal-modal.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .journal-content {
+            background-color: var(--background-color);
+            border-radius: 10px;
+            padding: 2rem;
+            width: 80%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .journal-title {
+            text-align: center;
+            margin-bottom: 1rem;
+            color: var(--accent-color);
+        }
+
+        .memory-entry {
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .close-journal {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: var(--danger-color);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .bird-forms {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .bird-form {
+            padding: 0.5rem;
+            border-radius: 5px;
+            text-align: center;
+            opacity: 0.5;
+            transition: all 0.2s ease;
+        }
+
+        .bird-form.unlocked {
+            opacity: 1;
+            cursor: pointer;
+        }
+
+        .bird-form.active {
+            border: 2px solid var(--accent-color);
+        }
+
+        .bird-form img {
+            width: 60px;
+            height: 60px;
+            margin-bottom: 0.5rem;
+        }
+
+        .settings-btn {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background-color: rgba(0, 0, 0, 0.7);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1.5rem;
+            transition: all 0.2s ease;
+        }
+
+        .settings-btn:hover {
+            transform: scale(1.1);
+            background-color: var(--accent-color);
+            color: var(--background-color);
+        }
+
+        .settings-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .settings-modal.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .settings-content {
+            background-color: var(--background-color);
+            border-radius: 10px;
+            padding: 2rem;
+            width: 80%;
+            max-width: 400px;
+        }
+
+        .settings-title {
+            text-align: center;
+            margin-bottom: 1rem;
+            color: var(--accent-color);
+        }
+
+        .settings-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .theme-toggle {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .theme-btn {
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .theme-btn.light {
+            background-color: #f8f9fa;
+            color: #212529;
+        }
+
+        .theme-btn.dark {
+            background-color: #212529;
+            color: #f8f9fa;
+        }
+
+        .theme-btn.active {
+            border: 2px solid var(--accent-color);
+        }
+
+        .close-settings {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: var(--danger-color);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .game-area {
+                height: 350px;
+            }
+
+            .feather {
+                width: 40px;
+                height: 100px;
+            }
+
+            .options {
+                flex-direction: column;
+            }
+        }
+
+        /* Dark/Light theme variables */
+        body.light-theme {
+            --background-color: #f8f9fa;
+            --text-color: #212529;
+        }
+
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--background-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            transition: opacity 0.5s ease;
+        }
+
+        .loading-screen.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .feather-loading {
+            width: 100px;
+            height: 100px;
+            animation: float 2s infinite ease-in-out;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+    </style>
+</head>
+<body>
+    <div class="loading-screen">
+        <div class="feather-loading">
+            <svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M50 0C60 15 70 40 90 50C70 60 60 85 50 100C40 85 30 60 10 50C30 40 40 15 50 0Z" fill="#ffd43b"/>
+            </svg>
+        </div>
+        <h2>Loading...</h2>
+    </div>
+
+    <div class="container">
+        <h1 class="game-title">Feathers of Memory</h1>
+        
+        <div class="game-area">
+            <div class="scene forest-scene active">
+                <!-- Forest scene content will be dynamically populated -->
+            </div>
+            <div class="scene lake-scene">
+                <!-- Lake scene content will be dynamically populated -->
+            </div>
+            
+            <div class="memory-journal">📖</div>
+            <div class="settings-btn">⚙️</div>
+        </div>
+
+        <div class="journal-modal">
+            <div class="journal-content">
+                <h2 class="journal-title">Memory Journal</h2>
+                <div class="memory-entries">
+                    <!-- Memory entries will be dynamically populated -->
+                </div>
+                <div class="bird-forms">
+                    <!-- Bird forms will be dynamically populated -->
+                </div>
+                <button class="close-journal">✖</button>
+            </div>
+        </div>
+
+        <div class="settings-modal">
+            <div class="settings-content">
+                <h2 class="settings-title">Settings</h2>
+                <div class="settings-form">
+                    <div class="form-group">
+                        <label for="player-name">Player Name:</label>
+                        <input type="text" id="player-name" placeholder="Enter your name">
+                    </div>
+                    <div class="form-group">
+                        <label>Theme:</label>
+                        <div class="theme-toggle">
+                            <button class="theme-btn light">Light</button>
+                            <button class="theme-btn dark active">Dark</button>
+                        </div>
+                    </div>
+                </div>
+                <button class="close-settings">✖</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Game state management
+        const gameState = {
+            playerName: '',
+            currentScene: 'forest',
+            unlockedBirdForms: ['sparrow'],
+            activeBirdForm: 'sparrow',
+            memories: [],
+            dialogueState: 'start',
+            theme: 'dark'
+        };
+
+        // Bird forms with their abilities
+        const birdForms = {
+            sparrow: {
+                name: 'Sparrow',
+                ability: 'Hopping',
+                description: 'A small, agile bird that can hop quickly between branches.',
+                icon: '🐦'
+            },
+            robin: {
+                name: 'Robin',
+                ability: 'Singing',
+                description: 'Known for its beautiful song that can charm other birds.',
+                icon: '🐤'
+            }
+        };
+
+        // Memory database
+        const memoryDatabase = [
+            {
+                id: 'first-flight',
+                title: 'First Flight',
+                content: 'I remember the feeling of wind beneath my wings as I took my first flight from the nest. The world seemed so vast and full of possibilities.',
+                scene: 'forest'
+            },
+            {
+                id: 'robin-friend',
+                title: 'A New Friend',
+                content: 'The kind robin showed me how to find the juiciest worms. Their song still echoes in my mind, bringing comfort during lonely times.',
+                scene: 'lake'
+            }
+        ];
+
+        // Dialogue trees
+        const dialogues = {
+            forest: {
+                start: {
+                    text: "You wake up feeling disoriented. Your wings feel stiff, and your mind is foggy. The forest around you seems familiar, yet strange.",
+                    options: [
+                        { text: "Look around", next: "look-around" },
+                        { text: "Try to remember", next: "try-remember" }
+                    ]
+                },
+                "look-around": {
+                    text: "Tall trees surround you, their branches swaying gently in the breeze. A small stream trickles nearby, and you can hear other birds chirping in the distance.",
+                    options: [
+                        { text: "Approach the stream", next: "approach-stream" },
+                        { text: "Listen to the birds", next: "listen-birds" }
+                    ]
+                },
+                "try-remember": {
+                    text: "You strain to remember anything about yourself, but your memories are like scattered feathers in the wind. Only fragments remain, but you know you need to collect them.",
+                    options: [
+                        { text: "Focus on a fragmentary memory", next: "memory-fragment" },
+                        { text: "Let it go for now", next: "look-around" }
+                    ]
+                },
+                "approach-stream": {
+                    text: "As you hop toward the stream, your reflection becomes visible in the clear water. You're a small sparrow with unusually bright eyes.",
+                    options: [
+                        { text: "Take a drink", next: "take-drink" },
+                        { text: "Follow the stream", next: "follow-stream", leadsTo: { scene: "lake" }}
+                    ]
+                },
+                "listen-birds": {
+                    text: "You hear various bird calls, but one stands out—a melodious robin singing nearby. It seems to be calling to you.",
+                    options: [
+                        { text: "Approach the robin", next: "meet-robin" },
+                        { text: "Ignore and explore elsewhere", next: "approach-stream" }
+                    ]
+                },
+                "memory-fragment": {
+                    text: "A flash of memory: flying high above this very forest, feeling the joy of freedom. The memory brings warmth but fades quickly.",
+                    options: [
+                        { text: "Hold onto this feeling", next: "first-memory", memory: "first-flight" },
+                        { text: "Look for more clues", next: "listen-birds" }
+                    ]
+                },
+                "take-drink": {
+                    text: "The cool water refreshes you. As you drink, you notice colorful feathers floating downstream. They seem important somehow.",
+                    options: [
+                        { text: "Collect the feathers", next: "feather-puzzle" },
+                        { text: "Follow the stream", next: "follow-stream", leadsTo: { scene: "lake" }}
+                    ]
+                },
+                "meet-robin": {
+                    text: "<span class='character'>Robin:</span> Hello there, little one. You seem lost. I've seen you before, but you may not remember me. I can help you find a piece of your memory.",
+                    options: [
+                        { text: "Ask for help", next: "robin-help" },
+                        { text: "Ask about the feathers", next: "robin-feathers" }
+                    ]
+                },
+                "robin-help": {
+                    text: "<span class='character'>Robin:</span> To regain your first memory, you must solve a small puzzle. Arrange the colored feathers in the correct order to form a pattern.",
+                    options: [
+                        { text: "I'm ready for the puzzle", next: "feather-puzzle" }
+                    ]
+                },
+                "robin-feathers": {
+                    text: "<span class='character'>Robin:</span> Those feathers downstream are fragments of your memory. Collect and arrange them, and you might remember something important.",
+                    options: [
+                        { text: "Go to the stream", next: "take-drink" }
+                    ]
+                },
+                "feather-puzzle": {
+                    puzzle: "feather-arrangement",
+                    text: "Arrange the feathers in a rainbow pattern: red, yellow, green, blue.",
+                    options: []
+                },
+                "first-memory": {
+                    text: "As the feathers align perfectly, a vivid memory rushes back: your first flight! The exhilaration, the freedom, the view of the forest from above.",
+                    options: [
+                        { text: "Embrace the memory", next: "memory-embrace" },
+                        { text: "Share with Robin", next: "share-robin", condition: { dialogueVisited: "meet-robin" }}
+                    ]
+                },
+                "memory-embrace": {
+                    text: "The memory settles within you, warm and comforting. You feel stronger somehow, more connected to your past self.",
+                    options: [
+                        { text: "Continue exploring", next: "look-around" },
+                        { text: "Follow the stream", next: "follow-stream", leadsTo: { scene: "lake" }}
+                    ]
+                },
+                "share-robin": {
+                    text: "<span class='character'>Robin:</span> Wonderful! That's your first memory returned. There are many more to find. I think you should follow the stream to the lake next. I'll meet you there with another clue.",
+                    options: [
+                        { text: "Thank Robin and go to the lake", next: "follow-stream", leadsTo: { scene: "lake" }}
+                    ]
+                },
+                "follow-stream": {
+                    text: "You decide to follow the stream. It winds through the forest, eventually leading to what looks like a large lake in the distance.",
+                    options: [
+                        { text: "Continue to the lake", next: "arrive-lake", leadsTo: { scene: "lake" }}
+                    ]
+                }
+            },
+            lake: {
+                "arrive-lake": {
+                    text: "You arrive at a serene lake surrounded by reeds and flowering plants. The water sparkles in the sunlight, and various waterfowl glide across its surface.",
+                    options: [
+                        { text: "Look for Robin", next: "find-robin" },
+                        { text: "Explore the lakeside", next: "explore-lake" }
+                    ]
+                },
+                "find-robin": {
+                    text: "You spot Robin perched on a reed near the water's edge. It notices you and chirps happily.",
+                    options: [
+                        { text: "Approach Robin", next: "robin-lake-greeting" }
+                    ]
+                },
+                "robin-lake-greeting": {
+                    text: "<span class='character'>Robin:</span> You made it! I'm glad to see you here. This lake holds another memory for you. I can help you unlock it if you're ready.",
+                    options: [
+                        { text: "I'm ready", next: "robin-lake-help" },
+                        { text: "Let me explore first", next: "explore-lake" }
+                    ]
+                },
+                "explore-lake": {
+                    text: "As you hop along the lakeside, you notice peculiar patterns in the reeds and stones. It feels like they're trying to tell you something.",
+                    options: [
+                        { text: "Study the patterns", next: "lake-puzzle" },
+                        { text: "Look for Robin", next: "find-robin", condition: { dialogueNotVisited: "find-robin" }}
+                    ]
+                },
+                "robin-lake-help": {
+                    text: "<span class='character'>Robin:</span> Listen carefully to my song. It holds the key to unlocking your next transformation. Each note corresponds to a specific movement of the reeds.",
+                    options: [
+                        { text: "Listen to Robin's song", next: "robin-song" }
+                    ]
+                },
+                "robin-song": {
+                    text: "Robin sings a beautiful, complex melody. As you listen, the reeds around the lake seem to sway in pattern with the notes.",
+                    options: [
+                        { text: "Try to mimic the pattern", next: "lake-puzzle" }
+                    ]
+                },
+                "lake-puzzle": {
+                    puzzle: "reed-pattern",
+                    text: "Arrange the reeds to match the pattern you observed. The correct sequence will reveal a hidden path.",
+                    options: []
+                },
+                "robin-memory": {
+                    text: "<span class='character'>Robin:</span> You've done it! This memory shows how we first met. I taught you to find food when you were just learning to forage.",
+                    options: [
+                        { text: "Thank Robin", next: "robin-thanks", unlockBirdForm: "robin" }
+                    ]
+                },
+                "robin-thanks": {
+                    text: "<span class='character'>Robin:</span> You've unlocked the Robin form! Now you can sing like me and charm other birds. This will help you on your journey.",
+                    options: [
+                        { text: "Try your new form", next: "try-robin-form" }
+                    ]
+                },
+                "try-robin-form": {
+                    text: "You transform into a robin! Your voice changes, and you feel a new ability awakening—you can now sing songs that influence other birds and certain plants.",
+                    options: [
+                        { text: "Practice singing", next: "practice-singing" },
+                        { text: "Return to exploring", next: "arrive-lake" }
+                    ]
+                },
+                "practice-singing": {
+                    text: "Your melodious song echoes across the lake. Nearby reeds sway in response, and a hidden memory fragment gleams among them.",
+                    options: [
+                        { text: "Collect the memory fragment", next: "lake-memory", memory: "robin-friend" }
+                    ]
+                },
+                "lake-memory": {
+                    text: "As you collect the memory fragment, you recall the kindness Robin showed you when teaching you to find food. The memory warms your heart.",
+                    options: [
+                        { text: "Continue exploring", next: "arrive-lake" }
+                    ]
+                }
+            }
+        };
+
+        // DOM references
+        const loadingScreen = document.querySelector('.loading-screen');
+        const scenes = {
+            forest: document.querySelector('.forest-scene'),
+            lake: document.querySelector('.lake-scene')
+        };
+        const memoryJournalBtn = document.querySelector('.memory-journal');
+        const journalModal = document.querySelector('.journal-modal');
+        const journalContent = document.querySelector('.memory-entries');
+        const closeJournalBtn = document.querySelector('.close-journal');
+        const settingsBtn = document.querySelector('.settings-btn');
+        const settingsModal = document.querySelector('.settings-modal');
+        const closeSettingsBtn = document.querySelector('.close-settings');
+        const playerNameInput = document.getElementById('player-name');
+        const themeButtons = document.querySelectorAll('.theme-btn');
+        const birdFormsContainer = document.querySelector('.bird-forms');
+
+        // Initialize the game
+        function initGame() {
+            loadSavedGame();
+            renderCurrentScene();
+            setupEventListeners();
+            setTimeout(() => {
+                loadingScreen.classList.add('hidden');
+            }, 1500);
+        }
+
+        // Load saved game from localStorage
+        function loadSavedGame() {
+            const savedGame = localStorage.getItem('feathersOfMemoryGame');
+            if (savedGame) {
+                const parsedGame = JSON.parse(savedGame);
+                Object.assign(gameState, parsedGame);
+                
+                if (gameState.playerName) {
+                    playerNameInput.value = gameState.playerName;
+                }
+                
+                if (gameState.theme) {
+                    applyTheme(gameState.theme);
+                    themeButtons.forEach(btn => {
+                        btn.classList.remove('active');
+                        if (btn.classList.contains(gameState.theme)) {
+                            btn.classList.add('active');
+                        }
+                    });
+                }
+            }
+        }
+
+        // Save game to localStorage
+        function saveGame() {
+            localStorage.setItem('feathersOfMemoryGame', JSON.stringify(gameState));
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            memoryJournalBtn.addEventListener('click', toggleJournalModal);
+            closeJournalBtn.addEventListener('click', toggleJournalModal);
+            
+            settingsBtn.addEventListener('click', toggleSettingsModal);
+            closeSettingsBtn.addEventListener('click', toggleSettingsModal);
+            
+            playerNameInput.addEventListener('change', updatePlayerName);
+            
+            themeButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    themeButtons.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    
+                    if (btn.classList.contains('light')) {
+                        applyTheme('light');
+                    } else {
+                        applyTheme('dark');
+                    }
+                });
+            });
+        }
+
+        // Toggle journal modal
+        function toggleJournalModal() {
+            journalModal.classList.toggle('active');
+            if (journalModal.classList.contains('active')) {
+                renderMemoryJournal();
+                renderBirdForms();
+            }
+        }
+
+        // Toggle settings modal
+        function toggleSettingsModal() {
+            settingsModal.classList.toggle('active');
+        }
+
+        // Update player name
+        function updatePlayerName() {
+            gameState.playerName = playerNameInput.value;
+            saveGame();
+            
+            // Set a cookie to remember the player name for 7 days
+            setCookie('playerName', playerNameInput.value, 7);
+        }
+
+        // Apply theme
+        function applyTheme(theme) {
+            if (theme === 'light') {
+                document.body.classList.add('light-theme');
+            } else {
+                document.body.classList.remove('light-theme');
+            }
+            
+            gameState.theme = theme;
+            saveGame();
+            
+            // Set a cookie to remember the theme preference
+            setCookie('theme', theme, 30);
+        }
+
+        // Render the current scene
+        function renderCurrentScene() {
+            Object.keys(scenes).forEach(key => {
+                scenes[key].classList.remove('active');
+            });
+            
+            scenes[gameState.currentScene].classList.add('active');
+            
+            // Render the dialogue for the current scene and state
+            renderDialogue(dialogues[gameState.currentScene][gameState.dialogueState]);
+        }
+
+        // Render dialogue
+        function renderDialogue(dialogueNode) {
+            const scene = scenes[gameState.currentScene];
+            
+            // Clear existing content
+            scene.innerHTML = '';
+            
+            // Create dialogue box
+            const dialogueBox = document.createElement('div');
+            dialogueBox.className = 'dialogue-box';
+            dialogueBox.innerHTML = dialogueNode.text;
+            scene.appendChild(dialogueBox);
+            
+            // If it's a puzzle node, render puzzle
+            if (dialogueNode.puzzle) {
+                renderPuzzle(dialogueNode.puzzle, scene);
+            } else {
+                // Create options container
+                const optionsContainer = document.createElement('div');
+                optionsContainer.className = 'options';
+                
+                // Create option buttons
+                dialogueNode.options.forEach(option => {
+                    // Check if the option has conditions
+                    if (option.condition) {
+                        if (option.condition.dialogueVisited && !hasVisitedDialogue(option.condition.dialogueVisited)) {
+                            return; // Skip this option
+                        }
+                        if (option.condition.dialogueNotVisited && hasVisitedDialogue(option.condition.dialogueNotVisited)) {
+                            return; // Skip this option
+                        }
+                    }
+                    
+                    const optionBtn = document.createElement('button');
+                    optionBtn.className = 'option-btn';
+                    optionBtn.textContent = option.text;
+                    
+                    optionBtn.addEventListener('click', () => {
+                        // Process the option click
+                        gameState.dialogueState = option.next;
+                        
+                        // Check if this option unlocks a memory
+                        if (option.memory) {
+                            unlockMemory(option.memory);
+                        }
+                        
+                        // Check if this option unlocks a bird form
+                        if (option.unlockBirdForm) {
+                            unlockBirdForm(option.unlockBirdForm);
+                        }
+                        
+                        // Check if this option leads to a new scene
+                        if (option.leadsTo && option.leadsTo.scene) {
+                            gameState.currentScene = option.leadsTo.scene;
+                        }
+                        
+                        // Render the new dialogue state
+                        renderCurrentScene();
+                        
+                        // Save the game state
+                        saveGame();
+                    });
+                    
+                    optionsContainer.appendChild(optionBtn);
+                });
+                
+                scene.appendChild(optionsContainer);
+            }
+        }
+
+        // Check if dialogue has been visited
+        function hasVisitedDialogue(dialogueId) {
+            // We could store visited dialogues in the game state
+            // For simplicity, we'll just check if the memory associated with that dialogue exists
+            return gameState.memories.some(mem => {
+                const memory = memoryDatabase.find(m => m.id === mem);
+                return memory && memory.scene === gameState.currentScene;
+            });
+        }
+
+        // Render puzzle
+        function renderPuzzle(puzzleType, scene) {
+            const puzzleContainer = document.createElement('div');
+            puzzleContainer.className = 'puzzle-container';
+            
+            let puzzleTitle = '';
+            let puzzleContent = '';
+            let solutionHandler = null;
+            
+            if (puzzleType === 'feather-arrangement') {
+                puzzleTitle = 'Arrange the feathers in rainbow order';
+                puzzleContent = `
+                    <div class="feather-puzzle">
+                        <div class="feather blue" draggable="true" data-color="blue"></div>
+                        <div class="feather red" draggable="true" data-color="red"></div>
+                        <div class="feather green" draggable="true" data-color="green"></div>
+                        <div class="feather yellow" draggable="true" data-color="yellow"></div>
+                    </div>
+                    <button class="option-btn check-puzzle">Check Arrangement</button>
+                `;
+                solutionHandler = checkFeatherPuzzle;
+            } else if (puzzleType === 'reed-pattern') {
+                puzzleTitle = 'Arrange the reeds to match Robin\'s song';
+                puzzleContent = `
+                    <div class="feather-puzzle">
+                        <div class="feather green" draggable="true" data-color="green"></div>
+                        <div class="feather yellow" draggable="true" data-color="yellow"></div>
+                        <div class="feather blue" draggable="true" data-color="blue"></div>
+                        <div class="feather red" draggable="true" data-color="red"></div>
+                    </div>
+                    <button class="option-btn check-puzzle">Check Pattern</button>
+                `;
+                solutionHandler = checkReedPuzzle;
+            }
+            
+            puzzleContainer.innerHTML = `
+                <h3 class="puzzle-title">${puzzleTitle}</h3>
+                ${puzzleContent}
+            `;
+            
+            scene.appendChild(puzzleContainer);
+            
+            // Setup drag and drop for feathers
+            setupDragAndDrop();
+            
+            // Setup check button
+            const checkButton = puzzleContainer.querySelector('.check-puzzle');
+            checkButton.addEventListener('click', () => {
+                if (solutionHandler()) {
+                    // If puzzle is solved, advance to the next dialogue
+                    if (puzzleType === 'feather-arrangement') {
+                        gameState.dialogueState = 'first-memory';
+                        unlockMemory('first-flight');
+                    } else if (puzzleType === 'reed-pattern') {
+                        gameState.dialogueState = 'robin-memory';
+                    }
+                    renderCurrentScene();
+                    saveGame();
+                } else {
+                    alert('That\'s not quite right. Try again!');
+                }
+            });
+        }
+
+        // Setup drag and drop for feathers
+        function setupDragAndDrop() {
+            const feathers = document.querySelectorAll('.feather');
+            const featherPuzzle = document.querySelector('.feather-puzzle');
+            
+            feathers.forEach(feather => {
+                feather.addEventListener('dragstart', (e) => {
+                    e.dataTransfer.setData('text/plain', feather.dataset.color);
+                    setTimeout(() => {
+                        feather.style.opacity = '0.4';
+                    }, 0);
+                });
+                
+                feather.addEventListener('dragend', () => {
+                    feather.style.opacity = '1';
+                });
+            });
+            
+            featherPuzzle.addEventListener('dragover', (e) => {
+                e.preventDefault();
+            });
+            
+            featherPuzzle.addEventListener('drop', (e) => {
+                e.preventDefault();
+                const color = e.dataTransfer.getData('text/plain');
+                const draggedFeather = document.querySelector(`.feather[data-color="${color}"]`);
+                const dropTarget = e.target;
+                
+                if (dropTarget.classList.contains('feather')) {
+                    const targetColor = dropTarget.dataset.color;
+                    draggedFeather.dataset.color = targetColor;
+                    dropTarget.dataset.color = color;
+                    
+                    // Update visual appearance
+                    draggedFeather.className = `feather ${targetColor}`;
+                    dropTarget.className = `feather ${color}`;
+                }
+            });
+        }
+
+        // Check feather puzzle solution
+        function checkFeatherPuzzle() {
+            const feathers = document.querySelectorAll('.feather');
+            const colors = Array.from(feathers).map(f => f.dataset.color);
+            return arraysEqual(colors, ['red', 'yellow', 'green', 'blue']);
+        }
+
+        // Check reed puzzle solution
+        function checkReedPuzzle() {
+            const reeds = document.querySelectorAll('.feather');
+            const colors = Array.from(reeds).map(r => r.dataset.color);
+            return arraysEqual(colors, ['blue', 'green', 'yellow', 'red']);
+        }
+
+        // Helper function to compare arrays
+        function arraysEqual(a, b) {
+            if (a.length !== b.length) return false;
+            for (let i = 0; i < a.length; i++) {
+                if (a[i] !== b[i]) return false;
+            }
+            return true;
+        }
+
+        // Unlock a memory
+        function unlockMemory(memoryId) {
+            if (!gameState.memories.includes(memoryId)) {
+                gameState.memories.push(memoryId);
+                alert(`You've unlocked a new memory: "${memoryDatabase.find(m => m.id === memoryId).title}"!`);
+                saveGame();
+            }
+        }
+
+        // Unlock a bird form
+        function unlockBirdForm(formId) {
+            if (!gameState.unlockedBirdForms.includes(formId)) {
+                gameState.unlockedBirdForms.push(formId);
+                gameState.activeBirdForm = formId;
+                alert(`You've unlocked a new bird form: ${birdForms[formId].name}!`);
+                saveGame();
+            }
+        }
+
+        // Render memory journal
+        function renderMemoryJournal() {
+            journalContent.innerHTML = '';
+            
+            if (gameState.memories.length === 0) {
+                journalContent.innerHTML = '<p>No memories collected yet.</p>';
+                return;
+            }
+            
+            gameState.memories.forEach(memId => {
+                const memory = memoryDatabase.find(m => m.id === memId);
+                if (memory) {
+                    const memoryEntry = document.createElement('div');
+                    memoryEntry.className = 'memory-entry';
+                    memoryEntry.innerHTML = `
+                        <h3>${memory.title}</h3>
+                        <p>${memory.content}</p>
+                    `;
+                    journalContent.appendChild(memoryEntry);
+                }
+            });
+        }
+
+        // Render bird forms
+        function renderBirdForms() {
+            birdFormsContainer.innerHTML = '';
+            
+            Object.keys(birdForms).forEach(formId => {
+                const form = birdForms[formId];
+                const birdFormElement = document.createElement('div');
+                birdFormElement.className = `bird-form ${gameState.unlockedBirdForms.includes(formId) ? 'unlocked' : ''}`;
+                if (gameState.activeBirdForm === formId) {
+                    birdFormElement.classList.add('active');
+                }
+                
+                birdFormElement.innerHTML = `
+                    <div class="bird-icon">${form.icon}</div>
+                    <div class="bird-name">${form.name}</div>
+                `;
+                
+                if (gameState.unlockedBirdForms.includes(formId)) {
+                    birdFormElement.addEventListener('click', () => {
+                        gameState.activeBirdForm = formId;
+                        gameState.birdForms = gameState.unlockedBirdForms;
+                        saveGame();
+                        renderBirdForms();
+                    });
+                }
+                
+                birdFormsContainer.appendChild(birdFormElement);
+            });
+        }
+
+        // Helper function to set cookies
+        function setCookie(name, value, days) {
+            const date = new Date();
+            date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+            const expires = "expires=" + date.toUTCString();
+            document.cookie = name + "=" + value + ";" + expires + ";path=/";
+        }
+
+        // Helper function to get cookies
+        function getCookie(name) {
+            const cookieName = name + "=";
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                let cookie = cookies[i];
+                while (cookie.charAt(0) === ' ') {
+                    cookie = cookie.substring(1);
+                }
+                if (cookie.indexOf(cookieName) === 0) {
+                    return cookie.substring(cookieName.length, cookie.length);
+                }
+            }
+            return "";
+        }
+
+        // Start the game
+        window.addEventListener('DOMContentLoaded', initGame);
+    </script>
+</body>
+</html>

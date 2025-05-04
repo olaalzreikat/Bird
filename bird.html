@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bird Clicker!</title>
+    <style>
+        /* CSS Reset and Global Styles */
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --primary-color: #2c7da0;
+            --secondary-color: #a7c957;
+            --accent-color: #e76f51;
+            --light-bg: #f1faee;
+            --dark-bg: #1d3557;
+            --text-light: #f1faee;
+            --text-dark: #1d3557;
+            --success: #52b788;
+            --warning: #ffb703;
+            --danger: #e63946;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            background: linear-gradient(135deg, #89c2d9 0%, #014f86 100%);
+            color: var(--text-dark);
+            min-height: 100vh;
+        }
+
+        .wrapper {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+
+        .game-area {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .panel {
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .panel-header {
+            background-color: var(--primary-color);
+            color: var(--text-light);
+            padding: 0.75rem;
+            margin: -1rem -1rem 1rem -1rem;
+            border-radius: 0.5rem 0.5rem 0 0;
+            font-size: 1.2rem;
+            text-align: center;
+        }
+
+        /* Game Sections Layout */
+        .clicker-section {
+            flex: 1;
+            min-width: 300px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .interface-section {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .upgrades-section {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .birds-collection-section {
+            flex: 2;
+            min-width: 300px;
+        }
+
+        /* Button Styling */
+        .btn {
+            padding: 0.5rem 1rem;
+            margin: 0.25rem;
+            border: none;
+            border-radius: 0.25rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-success {
+            background-color: var(--success);
+            color: white;
+        }
+
+        .btn-warning {
+            background-color: var(--warning);
+            color: var(--text-dark);
+        }
+
+        .btn-danger {
+            background-color: var(--danger);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Bird Clicker Styling */
+        .bird-container {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            margin: 2rem auto;
+            cursor: pointer;
+            transition: transform 0.1s ease;
+        }
+
+        .bird-container:active {
+            transform: scale(0.95);
+        }
+
+        .bird {
+            width: 100%;
+            height: 100%;
+            background-image: url('/api/placeholder/200/200');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            transition: transform 0.3s ease;
+        }
+
+        .bird:hover {
+            transform: rotate(5deg);
+        }
+
+        /* Stats Display */
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding: 0.5rem;
+            background-color: var(--light-bg);
+            border-radius: 0.25rem;
+        }
+
+        .feather-count {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .feathers-per-second {
+            font-size: 0.9rem;
+            color: #555;
+        }
+
+        /* Upgrade Items */
+        .upgrade-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .upgrade-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            background-color: var(--light-bg);
+            border-radius: 0.25rem;
+            transition: background-color 0.2s ease;
+        }
+
+        .upgrade-item:hover {
+            background-color: #e9ecef;
+        }
+
+        .upgrade-item.disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* Bird Collection */
+        .search-bar {
+            display: flex;
+            margin-bottom: 1rem;
+        }
+
+        .search-bar input {
+            flex: 1;
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 0.25rem 0 0 0.25rem;
+        }
+
+        .search-bar button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0 0.25rem 0.25rem 0;
+            cursor: pointer;
+        }
+
+        .filter-options {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-options select {
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 0.25rem;
+        }
+
+        .birds-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 1rem;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .bird-card {
+            background-color: var(--light-bg);
+            border-radius: 0.25rem;
+            padding: 0.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: transform 0.2s ease;
+        }
+
+        .bird-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .bird-card img {
+            width: 80px;
+            height: 80px;
+            object-fit: contain;
+        }
+
+        .bird-card h3 {
+            font-size: 0.9rem;
+            margin: 0.5rem 0;
+            text-align: center;
+        }
+
+        .bird-card p {
+            font-size: 0.8rem;
+            color: #555;
+            text-align: center;
+        }
+
+        .locked {
+            filter: grayscale(100%);
+            position: relative;
+        }
+
+        .locked::after {
+            content: "🔒";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 2rem;
+        }
+
+        /* Feather animation */
+        @keyframes featherFall {
+            0% {
+                transform: translateY(-20px) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        .feather {
+            position: absolute;
+            pointer-events: none;
+            animation: featherFall 2s ease-out forwards;
+        }
+
+        /* Save notification */
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: var(--success);
+            color: white;
+            padding: 1rem;
+            border-radius: 0.25rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s ease;
+            z-index: 100;
+        }
+
+        .notification.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        /* Media Queries */
+        @media (max-width: 768px) {
+            .game-area {
+                flex-direction: column;
+            }
+            
+            .birds-grid {
+                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            }
+        }
+
+        /* Dark Theme */
+        body.dark-theme {
+            background: linear-gradient(135deg, #1a3a4a 0%, #0a1128 100%);
+            color: var(--text-light);
+        }
+
+        body.dark-theme .panel {
+            background-color: rgba(30, 30, 30, 0.8);
+            color: var(--text-light);
+        }
+
+        body.dark-theme .stats,
+        body.dark-theme .upgrade-item,
+        body.dark-theme .bird-card {
+            background-color: #2c3e50;
+            color: var(--text-light);
+        }
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+        <h1 style="text-align: center; color: white; margin-bottom: 1rem;">Bird Clicker!</h1>
+        
+        <div class="game-area">
+            <!-- Clicker Section -->
+            <div class="clicker-section panel">
+                <div class="panel-header">Click The Bird</div>
+                <div class="stats">
+                    <div class="feather-count" id="featherCount">0 feathers</div>
+                    <div class="feathers-per-second" id="feathersPerSecond">0 per second</div>
+                </div>
+                
+                <div class="bird-container" id="birdClicker">
+                    <img src="bird.png" alt="bird" class="bird">
+                    <div class="bird"></div>
+                </div>
+                
+                <div class="stats">
+                    <div>Feathers per click: <span id="feathersPerClick">1</span></div>
+                </div>
+            </div>
+            
+            <!-- Interface Section -->
+            <div class="interface-section panel">
+                <div class="panel-header">User Interface</div>
+                <div class="stats" style="background-color: green; color: white;">
+                    <div id="cashDisplay">feathers: 0</div>
+                </div>
+                
+                <div style="display: flex; justify-content: space-between; margin-top: 1rem;">
+                    <button class="btn btn-success" id="saveButton">Save</button>
+                    <button class="btn btn-warning" id="loadButton">Load</button>
+                    <button class="btn btn-danger" id="deleteButton">Delete</button>
+                </div>
+
+                <div style="margin-top: 1rem;">
+                    <button class="btn" id="themeToggle" style="width: 100%;">Toggle Dark/Light Theme</button>
+                </div>
+            </div>
+            
+            <!-- Upgrades Section -->
+            <div class="upgrades-section panel">
+                <div class="panel-header">Upgrades</div>
+                <div class="upgrade-list" id="upgradeList">
+                    <!-- Upgrades will be added here via JavaScript -->
+                </div>
+            </div>
+            
+            <!-- Birds Collection Section -->
+            <div class="birds-collection-section panel">
+                <div class="panel-header">Bird Collection</div>
+                
+                <div class="search-bar">
+                    <input type="text" id="searchInput" placeholder="Search birds...">
+                    <button id="searchButton">Search</button>
+                </div>
+                
+                <div class="filter-options">
+                    <select id="typeFilter">
+                        <option value="">All Types</option>
+                        <option value="songbird">Songbird</option>
+                        <option value="waterfowl">Waterfowl</option>
+                        <option value="raptor">Raptor</option>
+                        <option value="exotic">Exotic</option>
+                        <option value="flightless">Flightless</option>
+                    </select>
+                    
+                    <select id="colorFilter">
+                        <option value="">All Colors</option>
+                        <option value="red">Red</option>
+                        <option value="blue">Blue</option>
+                        <option value="yellow">Yellow</option>
+                        <option value="green">Green</option>
+                        <option value="brown">Brown</option>
+                        <option value="black">Black</option>
+                        <option value="white">White</option>
+                        <option value="multi">Multi-colored</option>
+                    </select>
+                    
+                    <select id="sortBy">
+                        <option value="name">Sort by Name</option>
+                        <option value="rarity">Sort by Rarity</option>
+                        <option value="unlockCost">Sort by Cost</option>
+                    </select>
+                </div>
+                
+                <div class="birds-grid" id="birdsGrid">
+                    <!-- Birds will be added here via JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="notification" id="notification">Game saved successfully!</div>
+    
+    <script>
+        // Game state
+        const gameState = {
+            feathers: 0,
+            feathersPerClick: 1,
+            feathersPerSecond: 0,
+            multiplier: 1,
+            autoClickersCount: 0,
+            unlockedBirds: [],
+            activeTheme: 'light'
+        };
+        
+        // DOM Elements
+        const featherCountEl = document.getElementById('featherCount');
+        const feathersPerSecondEl = document.getElementById('feathersPerSecond');
+        const feathersPerClickEl = document.getElementById('feathersPerClick');
+        const cashDisplayEl = document.getElementById('cashDisplay');
+        const birdClicker = document.getElementById('birdClicker');
+        const upgradeList = document.getElementById('upgradeList');
+        const birdsGrid = document.getElementById('birdsGrid');
+        const searchInput = document.getElementById('searchInput');
+        const searchButton = document.getElementById('searchButton');
+        const typeFilter = document.getElementById('typeFilter');
+        const colorFilter = document.getElementById('colorFilter');
+        const sortBy = document.getElementById('sortBy');
+        const saveButton = document.getElementById('saveButton');
+        const loadButton = document.getElementById('loadButton');
+        const deleteButton = document.getElementById('deleteButton');
+        const themeToggle = document.getElementById('themeToggle');
+        const notification = document.getElementById('notification');
+        
+        // Upgrades data
+        const upgrades = [
+            { id: 'click1', name: '+1 per click', cost: 10, type: 'click', value: 1, owned: 0 },
+            { id: 'mult1', name: '+0.2 multiplier', cost: 50, type: 'multiplier', value: 0.2, owned: 0 },
+            { id: 'auto1', name: '+1 autoclick', cost: 100, type: 'autoclicker', value: 1, owned: 0 },
+            { id: 'click2', name: '+5 per click', cost: 1000, type: 'click', value: 5, owned: 0 },
+            { id: 'mult2', name: '+0.5 multiplier', cost: 2500, type: 'multiplier', value: 0.5, owned: 0 },
+            { id: 'auto2', name: '+3 autoclick', cost: 5000, type: 'autoclicker', value: 3, owned: 0 },
+            { id: 'click3', name: '+20 per click', cost: 10000, type: 'click', value: 20, owned: 0 },
+            { id: 'mult3', name: '+3 multiplier', cost: 20000, type: 'multiplier', value: 3, owned: 0 }
+        ];
+        
+        // Birds collection data
+        const birds = [
+            { id: 'sparrow', name: 'House Sparrow', type: 'songbird', color: 'brown', rarity: 'common', unlockCost: 50 },
+            { id: 'robin', name: 'American Robin', type: 'songbird', color: 'red', rarity: 'common', unlockCost: 100 },
+            { id: 'bluejay', name: 'Blue Jay', type: 'songbird', color: 'blue', rarity: 'uncommon', unlockCost: 250 },
+            { id: 'cardinal', name: 'Northern Cardinal', type: 'songbird', color: 'red', rarity: 'uncommon', unlockCost: 500 },
+            { id: 'mallard', name: 'Mallard Duck', type: 'waterfowl', color: 'green', rarity: 'common', unlockCost: 750 },
+            { id: 'goose', name: 'Canada Goose', type: 'waterfowl', color: 'brown', rarity: 'common', unlockCost: 1000 },
+            { id: 'hawk', name: 'Red-tailed Hawk', type: 'raptor', color: 'brown', rarity: 'rare', unlockCost: 2500 },
+            { id: 'owl', name: 'Great Horned Owl', type: 'raptor', color: 'brown', rarity: 'rare', unlockCost: 5000 },
+            { id: 'eagle', name: 'Bald Eagle', type: 'raptor', color: 'brown', rarity: 'epic', unlockCost: 10000 },
+            { id: 'flamingo', name: 'Flamingo', type: 'exotic', color: 'red', rarity: 'rare', unlockCost: 7500 },
+            { id: 'toucan', name: 'Toucan', type: 'exotic', color: 'multi', rarity: 'epic', unlockCost: 15000 },
+            { id: 'peacock', name: 'Peacock', type: 'exotic', color: 'blue', rarity: 'epic', unlockCost: 20000 }
+        ];
+        
+        // Initialize game
+        function initGame() {
+            renderUpgrades();
+            renderBirds();
+            updateUI();
+            
+            // Set up auto clickers loop (every second)
+            setInterval(autoClickerTick, 1000);
+        }
+        
+        // Event listeners
+        birdClicker.addEventListener('click', function(event) {
+            const clickValue = Math.floor(gameState.feathersPerClick * gameState.multiplier);
+            gameState.feathers += clickValue;
+            updateUI();
+            createFeatherAnimation(event);
+        });
+        
+        searchButton.addEventListener('click', renderBirds);
+        searchInput.addEventListener('keyup', function(event) {
+            if (event.key === 'Enter') {
+                renderBirds();
+            }
+        });
+        
+        typeFilter.addEventListener('change', renderBirds);
+        colorFilter.addEventListener('change', renderBirds);
+        sortBy.addEventListener('change', renderBirds);
+        
+        saveButton.addEventListener('click', saveGame);
+        loadButton.addEventListener('click', loadGame);
+        deleteButton.addEventListener('click', deleteGame);
+        
+        themeToggle.addEventListener('click', toggleTheme);
+        
+        // Functions
+        function createFeatherAnimation(event) {
+            const rect = birdClicker.getBoundingClientRect();
+            const x = event.clientX - rect.left;
+            const y = event.clientY - rect.top;
+            
+            const feather = document.createElement('div');
+            feather.className = 'feather';
+            feather.innerHTML = '🪶';
+            feather.style.left = x + 'px';
+            feather.style.top = y + 'px';
+            
+            birdClicker.appendChild(feather);
+            
+            setTimeout(() => {
+                feather.remove();
+            }, 2000);
+        }
+        
+        function autoClickerTick() {
+            if (gameState.autoClickersCount > 0) {
+                const generatedFeathers = gameState.autoClickersCount * gameState.multiplier;
+                gameState.feathers += generatedFeathers;
+                updateUI();
+            }
+        }
+        
+        function updateUI() {
+            featherCountEl.textContent = `${Math.floor(gameState.feathers)} feathers`;
+            feathersPerSecondEl.textContent = `${gameState.autoClickersCount * gameState.multiplier} per second`;
+            feathersPerClickEl.textContent = Math.floor(gameState.feathersPerClick * gameState.multiplier);
+            cashDisplayEl.textContent = `feathers: ${Math.floor(gameState.feathers)}`;
+            
+            updateUpgradeButtons();
+            updateBirdCollection();
+        }
+        
+        function renderUpgrades() {
+            upgradeList.innerHTML = '';
+            
+            upgrades.forEach(upgrade => {
+                const upgradeItem = document.createElement('div');
+                upgradeItem.className = 'upgrade-item';
+                upgradeItem.id = `upgrade-${upgrade.id}`;
+                
+                const upgradeInfo = document.createElement('div');
+                upgradeInfo.innerHTML = `
+                    <strong>${upgrade.name}</strong>
+                    <div>Owned: ${upgrade.owned}</div>
+                `;
+                
+                const upgradeButton = document.createElement('button');
+                upgradeButton.className = 'btn btn-success';
+                upgradeButton.textContent = `Cost: ${upgrade.cost}`;
+                upgradeButton.dataset.id = upgrade.id;
+                
+                upgradeButton.addEventListener('click', () => buyUpgrade(upgrade.id));
+                
+                upgradeItem.appendChild(upgradeInfo);
+                upgradeItem.appendChild(upgradeButton);
+                upgradeList.appendChild(upgradeItem);
+            });
+            
+            updateUpgradeButtons();
+        }
+        
+        function updateUpgradeButtons() {
+            upgrades.forEach(upgrade => {
+                const upgradeElement = document.getElementById(`upgrade-${upgrade.id}`);
+                if (!upgradeElement) return;
+                
+                const button = upgradeElement.querySelector('button');
+                
+                if (gameState.feathers >= upgrade.cost) {
+                    upgradeElement.classList.remove('disabled');
+                    button.disabled = false;
+                } else {
+                    upgradeElement.classList.add('disabled');
+                    button.disabled = true;
+                }
+            });
+        }
+        
+        function buyUpgrade(upgradeId) {
+            const upgrade = upgrades.find(u => u.id === upgradeId);
+            
+            if (gameState.feathers >= upgrade.cost) {
+                gameState.feathers -= upgrade.cost;
+                upgrade.owned += 1;
+                
+                // Apply upgrade effect
+                switch (upgrade.type) {
+                    case 'click':
+                        gameState.feathersPerClick += upgrade.value;
+                        break;
+                    case 'multiplier':
+                        gameState.multiplier += upgrade.value;
+                        break;
+                    case 'autoclicker':
+                        gameState.autoClickersCount += upgrade.value;
+                        break;
+                }
+                
+                // Increase cost for next purchase (20% increase)
+                upgrade.cost = Math.floor(upgrade.cost * 1.2);
+                
+                renderUpgrades();
+                updateUI();
+            }
+        }
+        
+        function renderBirds() {
+            birdsGrid.innerHTML = '';
+            
+            // Get filter values
+            const searchTerm = searchInput.value.toLowerCase();
+            const typeValue = typeFilter.value;
+            const colorValue = colorFilter.value;
+            const sortValue = sortBy.value;
+            
+            // Filter birds
+            let filteredBirds = birds.filter(bird => {
+                const matchesSearch = bird.name.toLowerCase().includes(searchTerm);
+                const matchesType = typeValue === '' || bird.type === typeValue;
+                const matchesColor = colorValue === '' || bird.color === colorValue;
+                
+                return matchesSearch && matchesType && matchesColor;
+            });
+            
+            // Sort birds
+            filteredBirds.sort((a, b) => {
+                switch (sortValue) {
+                    case 'name':
+                        return a.name.localeCompare(b.name);
+                    case 'rarity':
+                        const rarityOrder = {'common': 0, 'uncommon': 1, 'rare': 2, 'epic': 3, 'legendary': 4};
+                        return rarityOrder[a.rarity] - rarityOrder[b.rarity];
+                    case 'unlockCost':
+                        return a.unlockCost - b.unlockCost;
+                    default:
+                        return 0;
+                }
+            });
+            
+            // Render filtered birds
+            filteredBirds.forEach(bird => {
+                const isUnlocked = gameState.unlockedBirds.includes(bird.id);
+                
+                const birdCard = document.createElement('div');
+                birdCard.className = 'bird-card';
+                if (!isUnlocked) birdCard.classList.add('locked');
+                
+                birdCard.innerHTML = `
+                    <img src="/api/placeholder/80/80" alt="${bird.name}">
+                    <h3>${bird.name}</h3>
+                    <p>${bird.rarity}</p>
+                    ${!isUnlocked ? `<button class="btn btn-success unlock-bird" data-id="${bird.id}" data-cost="${bird.unlockCost}">Unlock: ${bird.unlockCost}</button>` : ''}
+                `;
+                
+                if (!isUnlocked) {
+                    const unlockButton = birdCard.querySelector('.unlock-bird');
+                    if (unlockButton) {
+                        unlockButton.addEventListener('click', () => unlockBird(bird.id, bird.unlockCost));
+                        
+                        if (gameState.feathers < bird.unlockCost) {
+                            unlockButton.disabled = true;
+                            unlockButton.classList.add('disabled');
+                        }
+                    }
+                }
+                
+                birdsGrid.appendChild(birdCard);
+            });
+        }
+        
+        function updateBirdCollection() {
+            const unlockButtons = document.querySelectorAll('.unlock-bird');
+            
+            unlockButtons.forEach(button => {
+                const cost = parseInt(button.dataset.cost);
+                
+                if (gameState.feathers >= cost) {
+                    button.disabled = false;
+                    button.classList.remove('disabled');
+                } else {
+                    button.disabled = true;
+                    button.classList.add('disabled');
+                }
+            });
+        }
+        
+        function unlockBird(birdId, cost) {
+            if (gameState.feathers >= cost && !gameState.unlockedBirds.includes(birdId)) {
+                gameState.feathers -= cost;
+                gameState.unlockedBirds.push(birdId);
+                
+                showNotification(`${birds.find(b => b.id === birdId).name} unlocked!`);
+                renderBirds();
+                updateUI();
+            }
+        }
+        
+        function saveGame() {
+            try {
+                localStorage.setItem('birdClickerSave', JSON.stringify(gameState));
+                showNotification('Game saved successfully!');
+            } catch (error) {
+                console.error('Save failed:', error);
+                showNotification('Failed to save game', 'error');
+            }
+        }
+        
+        function loadGame() {
+            try {
+                const savedGame = localStorage.getItem('birdClickerSave');
+                
+                if (savedGame) {
+                    const loadedState = JSON.parse(savedGame);
+                    
+                    // Update game state with loaded values
+                    Object.assign(gameState, loadedState);
+                    
+                    // Update upgrades owned counts
+                    upgrades.forEach(upgrade => {
+                        const savedUpgrade = loadedState.upgrades ? loadedState.upgrades.find(u => u.id === upgrade.id) : null;
+                        if (savedUpgrade) {
+                            upgrade.owned = savedUpgrade.owned;
+                            upgrade.cost = savedUpgrade.cost;
+                        }
+                    });
+                    
+                    renderUpgrades();
+                    renderBirds();
+                    updateUI();
+                    
+                    showNotification('Game loaded successfully!');
+                } else {
+                    showNotification('No saved game found', 'error');
+                }
+            } catch (error) {
+                console.error('Load failed:', error);
+                showNotification('Failed to load game', 'error');
+            }
+        }
+        
+        function deleteGame() {
+            if (confirm('Are you sure you want to delete your save? This cannot be undone.')) {
+                localStorage.removeItem('birdClickerSave');
+                location.reload();
+            }
+        }
+        
+        function toggleTheme() {
+            document.body.classList.toggle('dark-theme');
+            gameState.activeTheme = document.body.classList.contains('dark-theme') ? 'dark' : 'light';
+        }
+        
+        function showNotification(message, type = 'success') {
+            notification.textContent = message;
+            notification.className = 'notification show';
+            
+            if (type === 'error') {
+                notification.style.backgroundColor = 'var(--danger)';
+            } else {
+                notification.style.backgroundColor = 'var(--success)';
+            }
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+        
+        // Initialize the game
+        initGame();
+    </script>
+</body>
+</html>

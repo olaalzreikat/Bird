@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Space Bird Collector</title>
+    <style>
+        /* Global Reset */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #0a0a2a;
+            color: #ffffff;
+            overflow-x: hidden;
+        }
+
+        /* Game Container */
+        .game-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            padding: 20px;
+            margin-bottom: 20px;
+            background-color: #1a1a4a;
+            border-radius: 10px;
+        }
+
+        h1 {
+            color: #ff8f00;
+            margin-bottom: 10px;
+        }
+
+        /* Game Layout */
+        .game-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .game-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Game Sections */
+        .game-section {
+            background-color: #1a1a4a;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            color: #ff8f00;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #ff8f00;
+            padding-bottom: 5px;
+        }
+
+        /* Click Area */
+        .click-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 300px;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .planet {
+            width: 150px;
+            height: 150px;
+            background: radial-gradient(circle at 30% 30%, #4a9fe0, #1e4fd8);
+            border-radius: 50%;
+            box-shadow: 0 0 30px rgba(30, 79, 216, 0.8);
+            transition: transform 0.2s;
+            position: relative;
+        }
+
+        .planet:before {
+            content: "";
+            position: absolute;
+            width: 160px;
+            height: 30px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            transform: rotate(-30deg);
+            top: 30px;
+            left: -5px;
+        }
+
+        .planet:active {
+            transform: scale(0.95);
+        }
+
+        .click-value {
+            margin-top: 20px;
+            font-size: 18px;
+            font-weight: bold;
+            color: #ff8f00;
+        }
+
+        /* Stats */
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding: 5px 0;
+            border-bottom: 1px solid #333366;
+        }
+
+        .stat-value {
+            font-weight: bold;
+            color: #ff8f00;
+        }
+
+        /* Upgrades */
+        .upgrade-item {
+            background-color: #252570;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .upgrade-item:hover {
+            background-color: #333399;
+        }
+
+        .upgrade-item.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .upgrade-info {
+            flex: 1;
+        }
+
+        .upgrade-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .upgrade-cost {
+            color: #ff8f00;
+            font-weight: bold;
+            text-align: right;
+            padding-left: 10px;
+        }
+
+        /* Birds */
+        .bird-collection {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .bird-item {
+            background-color: #252570;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+            cursor: pointer;
+        }
+
+        .bird-item.locked {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .bird-item.equipped {
+            border: 2px solid #ff8f00;
+        }
+
+        .bird-icon {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+
+        .bird-name {
+            font-weight: bold;
+        }
+
+        .bird-requirement {
+            font-size: 12px;
+            color: #aaaaaa;
+        }
+
+        /* Controls */
+        .game-controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .save-btn {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .load-btn {
+            background-color: #2196F3;
+            color: white;
+        }
+
+        .reset-btn {
+            background-color: #f44336;
+            color: white;
+        }
+
+        button:hover {
+            filter: brightness(1.1);
+        }
+
+        /* Notification */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: #333366;
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            transition: opacity 0.3s, transform 0.3s;
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+
+        .notification.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <header>
+            <h1>SPACE BIRD COLLECTOR</h1>
+            <p>Click the planet, collect cosmic energy, and discover rare space birds!</p>
+        </header>
+
+        <div class="game-layout">
+            <!-- Click Area -->
+            <div class="game-section">
+                <h2 class="section-title">Cosmic Energy Source</h2>
+                <div class="click-area" id="clickArea">
+                    <div class="planet" id="planetButton"></div>
+                    <div class="click-value" id="clickValue">+1 per click</div>
+                </div>
+            </div>
+
+            <!-- Stats Section -->
+            <div class="game-section">
+                <h2 class="section-title">Stats</h2>
+                <div class="stat-item">
+                    <span>Cosmic Energy:</span>
+                    <span class="stat-value" id="energyCounter">0</span>
+                </div>
+                <div class="stat-item">
+                    <span>Per Click:</span>
+                    <span class="stat-value" id="perClickCounter">1</span>
+                </div>
+                <div class="stat-item">
+                    <span>Auto Click:</span>
+                    <span class="stat-value" id="autoClickCounter">0/sec</span>
+                </div>
+                <div class="stat-item">
+                    <span>Multiplier:</span>
+                    <span class="stat-value" id="multiplierCounter">x1</span>
+                </div>
+                <div class="stat-item">
+                    <span>Birds Found:</span>
+                    <span class="stat-value" id="birdsFoundCounter">0/8</span>
+                </div>
+
+                <div class="game-controls">
+                    <button class="save-btn" id="saveButton">Save</button>
+                    <button class="load-btn" id="loadButton">Load</button>
+                    <button class="reset-btn" id="resetButton">Reset</button>
+                </div>
+            </div>
+
+            <!-- Upgrades Section -->
+            <div class="game-section">
+                <h2 class="section-title">Upgrades</h2>
+                <div id="upgradesContainer">
+                    <!-- Upgrades will be dynamically added here -->
+                </div>
+            </div>
+
+            <!-- Birds Collection -->
+            <div class="game-section">
+                <h2 class="section-title">Space Birds</h2>
+                <div class="bird-collection" id="birdCollection">
+                    <!-- Birds will be dynamically added here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="notification" id="notification"></div>
+
+    <script>
+        // Game state
+        let gameState = {
+            energy: 0,
+            perClick: 1,
+            autoClick: 0,
+            multiplier: 1,
+            birdsFound: 0,
+            upgrades: {},
+            birds: {}
+        };
+
+        // DOM Elements
+        const planetButton = document.getElementById('planetButton');
+        const clickValue = document.getElementById('clickValue');
+        const energyCounter = document.getElementById('energyCounter');
+        const perClickCounter = document.getElementById('perClickCounter');
+        const autoClickCounter = document.getElementById('autoClickCounter');
+        const multiplierCounter = document.getElementById('multiplierCounter');
+        const birdsFoundCounter = document.getElementById('birdsFoundCounter');
+        const upgradesContainer = document.getElementById('upgradesContainer');
+        const birdCollection = document.getElementById('birdCollection');
+        const saveButton = document.getElementById('saveButton');
+        const loadButton = document.getElementById('loadButton');
+        const resetButton = document.getElementById('resetButton');
+        const notification = document.getElementById('notification');
+
+        // Upgrades data
+        const upgradesData = [
+            { id: 'clickUp1', name: '+1 per click', cost: 10, perClickBonus: 1, multiplierBonus: 0, autoClickBonus: 0 },
+            { id: 'autoClick1', name: '+1 auto click', cost: 100, perClickBonus: 0, multiplierBonus: 0, autoClickBonus: 1 },
+            { id: 'multiplier1', name: 'x2 multiplier', cost: 50, perClickBonus: 0, multiplierBonus: 2, autoClickBonus: 0 },
+            { id: 'clickUp2', name: '+5 per click', cost: 1000, perClickBonus: 5, multiplierBonus: 0, autoClickBonus: 0 },
+            { id: 'autoClick2', name: '+1 auto click', cost: 100, perClickBonus: 0, multiplierBonus: 0, autoClickBonus: 1 },
+            { id: 'multiplier2', name: 'x0.5 multiplier', cost: 2500, perClickBonus: 0, multiplierBonus: 1.5, autoClickBonus: 0 },
+            { id: 'clickUp3', name: '+20 per click', cost: 10000, perClickBonus: 20, multiplierBonus: 0, autoClickBonus: 0 },
+            { id: 'autoClick3', name: '+3 auto click', cost: 5000, perClickBonus: 0, multiplierBonus: 0, autoClickBonus: 3 }
+        ];
+
+        // Birds data
+        const birdsData = [
+            { id: 'stellarJay', name: 'Stellar Jay', requirement: 500, bonus: 'x1.1 click power', bonusType: 'clickMultiplier', bonusValue: 1.1, icon: '🐦' },
+            { id: 'nebulaFinch', name: 'Nebula Finch', requirement: 2000, bonus: '+2 auto clicks', bonusType: 'autoClick', bonusValue: 2, icon: '🐤' },
+            { id: 'cosmicOwl', name: 'Cosmic Owl', requirement: 5000, bonus: 'x1.2 multiplier', bonusType: 'globalMultiplier', bonusValue: 1.2, icon: '🦉' },
+            { id: 'asteroidDove', name: 'Asteroid Dove', requirement: 10000, bonus: '+5 per click', bonusType: 'perClick', bonusValue: 5, icon: '🕊️' },
+            { id: 'solarEagle', name: 'Solar Eagle', requirement: 20000, bonus: 'x1.5 click power', bonusType: 'clickMultiplier', bonusValue: 1.5, icon: '🦅' },
+            { id: 'novaCanary', name: 'Nova Canary', requirement: 50000, bonus: '+10 auto clicks', bonusType: 'autoClick', bonusValue: 10, icon: '🐥' },
+            { id: 'quantumPenguin', name: 'Quantum Penguin', requirement: 100000, bonus: 'x2 multiplier', bonusType: 'globalMultiplier', bonusValue: 2, icon: '🐧' },
+            { id: 'galacticFlamingo', name: 'Galactic Flamingo', requirement: 250000, bonus: '+50 per click', bonusType: 'perClick', bonusValue: 50, icon: '🦩' }
+        ];
+
+        // Initialize game
+        function initGame() {
+            // Initialize upgrades
+            upgradesData.forEach(upgrade => {
+                if (!gameState.upgrades[upgrade.id]) {
+                    gameState.upgrades[upgrade.id] = {
+                        purchased: 0,
+                        cost: upgrade.cost
+                    };
+                }
+            });
+
+            // Initialize birds
+            birdsData.forEach(bird => {
+                if (!gameState.birds[bird.id]) {
+                    gameState.birds[bird.id] = {
+                        unlocked: false,
+                        equipped: false
+                    };
+                }
+            });
+
+            // Render game elements
+            renderUpgrades();
+            renderBirds();
+            updateUI();
+        }
+
+        // Update UI
+        function updateUI() {
+            // Update stats
+            energyCounter.textContent = formatNumber(gameState.energy);
+            perClickCounter.textContent = formatNumber(calculatePerClick());
+            autoClickCounter.textContent = formatNumber(gameState.autoClick) + '/sec';
+            multiplierCounter.textContent = 'x' + formatNumber(gameState.multiplier);
+            birdsFoundCounter.textContent = gameState.birdsFound + '/' + birdsData.length;
+            
+            // Update click value
+            clickValue.textContent = '+' + formatNumber(calculatePerClick()) + ' per click';
+            
+            // Update upgrades availability
+            updateUpgradesAvailability();
+            
+            // Check for bird unlocks
+            checkBirdUnlocks();
+        }
+
+        // Calculate per click value with all bonuses
+        function calculatePerClick() {
+            let value = gameState.perClick;
+            
+            // Apply bird bonuses
+            birdsData.forEach(bird => {
+                if (gameState.birds[bird.id] && gameState.birds[bird.id].equipped) {
+                    if (bird.bonusType === 'perClick') {
+                        value += bird.bonusValue;
+                    } else if (bird.bonusType === 'clickMultiplier') {
+                        value *= bird.bonusValue;
+                    }
+                }
+            });
+            
+            // Apply global multiplier
+            value *= gameState.multiplier;
+            
+            return Math.floor(value);
+        }
+
+        // Format large numbers
+        function formatNumber(num) {
+            if (num >= 1000000) {
+                return (num / 1000000).toFixed(1) + 'M';
+            } else if (num >= 1000) {
+                return (num / 1000).toFixed(1) + 'K';
+            }
+            return num;
+        }
+
+        // Render upgrades
+        function renderUpgrades() {
+            upgradesContainer.innerHTML = '';
+            
+            upgradesData.forEach(upgrade => {
+                const upgradeState = gameState.upgrades[upgrade.id];
+                
+                const upgradeElement = document.createElement('div');
+                upgradeElement.className = 'upgrade-item';
+                upgradeElement.innerHTML = `
+                    <div class="upgrade-info">
+                        <div class="upgrade-name">${upgrade.name}</div>
+                        <div class="upgrade-desc">Level: ${upgradeState.purchased}</div>
+                    </div>
+                    <div class="upgrade-cost">${formatNumber(upgradeState.cost)}</div>
+                `;
+                
+                upgradeElement.addEventListener('click', () => {
+                    purchaseUpgrade(upgrade.id);
+                });
+                
+                upgradesContainer.appendChild(upgradeElement);
+            });
+            
+            updateUpgradesAvailability();
+        }
+
+        // Update upgrades availability based on energy
+        function updateUpgradesAvailability() {
+            const upgradeElements = document.querySelectorAll('.upgrade-item');
+            
+            upgradeElements.forEach((element, index) => {
+                const upgrade = upgradesData[index];
+                const upgradeState = gameState.upgrades[upgrade.id];
+                
+                if (gameState.energy >= upgradeState.cost) {
+                    element.classList.remove('disabled');
+                } else {
+                    element.classList.add('disabled');
+                }
+            });
+        }
+
+        // Render birds
+        function renderBirds() {
+            birdCollection.innerHTML = '';
+            
+            birdsData.forEach(bird => {
+                const birdState = gameState.birds[bird.id];
+                
+                const birdElement = document.createElement('div');
+                birdElement.className = 'bird-item' + 
+                                     (birdState.unlocked ? '' : ' locked') +
+                                     (birdState.equipped ? ' equipped' : '');
+                
+                birdElement.innerHTML = `
+                    <div class="bird-icon">${birdState.unlocked ? bird.icon : '?'}</div>
+                    <div class="bird-name">${birdState.unlocked ? bird.name : '???'}</div>
+                    <div class="bird-requirement">${birdState.unlocked ? bird.bonus : 'Unlock: ' + formatNumber(bird.requirement)}</div>
+                `;
+                
+                if (birdState.unlocked) {
+                    birdElement.addEventListener('click', () => {
+                        toggleEquipBird(bird.id);
+                    });
+                }
+                
+                birdCollection.appendChild(birdElement);
+            });
+        }
+
+        // Check if any birds should be unlocked
+        function checkBirdUnlocks() {
+            birdsData.forEach(bird => {
+                const birdState = gameState.birds[bird.id];
+                
+                if (!birdState.unlocked && gameState.energy >= bird.requirement) {
+                    birdState.unlocked = true;
+                    gameState.birdsFound++;
+                    showNotification(`New bird discovered: ${bird.name}!`);
+                    renderBirds();
+                }
+            });
+        }
+
+        // Toggle equip/unequip bird
+        function toggleEquipBird(birdId) {
+            const birdState = gameState.birds[birdId];
+            const bird = birdsData.find(b => b.id === birdId);
+            
+            if (birdState.unlocked) {
+                birdState.equipped = !birdState.equipped;
+                
+                if (birdState.equipped) {
+                    showNotification(`${bird.name} equipped!`);
+                } else {
+                    showNotification(`${bird.name} unequipped.`);
+                }
+                
+                renderBirds();
+                updateUI();
+            }
+        }
+
+        // Purchase upgrade
+        function purchaseUpgrade(upgradeId) {
+            const upgrade = upgradesData.find(u => u.id === upgradeId);
+            const upgradeState = gameState.upgrades[upgradeId];
+            
+            if (gameState.energy >= upgradeState.cost) {
+                // Deduct cost
+                gameState.energy -= upgradeState.cost;
+                
+                // Apply upgrade effects
+                gameState.perClick += upgrade.perClickBonus;
+                gameState.autoClick += upgrade.autoClickBonus;
+                if (upgrade.multiplierBonus > 0) {
+                    gameState.multiplier *= upgrade.multiplierBonus;
+                }
+                
+                // Update upgrade state
+                upgradeState.purchased++;
+                upgradeState.cost = Math.floor(upgrade.cost * Math.pow(1.5, upgradeState.purchased));
+                
+                showNotification(`Purchased: ${upgrade.name}`);
+                renderUpgrades();
+                updateUI();
+            } else {
+                showNotification("Not enough energy!");
+            }
+        }
+
+        // Click event handler
+        function handlePlanetClick() {
+            const clickValue = calculatePerClick();
+            gameState.energy += clickValue;
+            updateUI();
+        }
+
+        // Auto click function (runs every second)
+        function processAutoClicks() {
+            if (gameState.autoClick > 0) {
+                let autoClickValue = gameState.autoClick;
+                
+                // Apply bird bonuses to auto click
+                birdsData.forEach(bird => {
+                    if (gameState.birds[bird.id] && gameState.birds[bird.id].equipped) {
+                        if (bird.bonusType === 'autoClick') {
+                            autoClickValue += bird.bonusValue;
+                        } else if (bird.bonusType === 'globalMultiplier') {
+                            autoClickValue *= bird.bonusValue;
+                        }
+                    }
+                });
+                
+                // Apply global multiplier
+                autoClickValue *= gameState.multiplier;
+                
+                gameState.energy += Math.floor(autoClickValue);
+                updateUI();
+            }
+        }
+
+        // Show notification
+        function showNotification(message) {
+            notification.textContent = message;
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        // Save game
+        function saveGame() {
+            localStorage.setItem('spaceBirdCollector_saveData', JSON.stringify(gameState));
+            showNotification("Game saved!");
+        }
+
+        // Load game
+        function loadGame() {
+            const savedData = localStorage.getItem('spaceBirdCollector_saveData');
+            
+            if (savedData) {
+                gameState = JSON.parse(savedData);
+                renderUpgrades();
+                renderBirds();
+                updateUI();
+                showNotification("Game loaded!");
+            } else {
+                showNotification("No saved game found!");
+            }
+        }
+
+        // Reset game
+        function resetGame() {
+            if (confirm("Are you sure you want to reset your progress?")) {
+                gameState = {
+                    energy: 0,
+                    perClick: 1,
+                    autoClick: 0,
+                    multiplier: 1,
+                    birdsFound: 0,
+                    upgrades: {},
+                    birds: {}
+                };
+                
+                initGame();
+                showNotification("Game reset!");
+            }
+        }
+
+        // Event listeners
+        planetButton.addEventListener('click', handlePlanetClick);
+        saveButton.addEventListener('click', saveGame);
+        loadButton.addEventListener('click', loadGame);
+        resetButton.addEventListener('click', resetGame);
+
+        // Initialize game
+        initGame();
+
+        // Set up auto-click interval
+        setInterval(processAutoClicks, 1000);
+    </script>
+</body>
+</html>

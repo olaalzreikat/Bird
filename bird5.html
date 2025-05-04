@@ -1,0 +1,972 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feathers of Memory</title>
+    <style>
+        /* Global Reset with box-sizing */
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* CSS Variables */
+        :root {
+            --primary-color: #4a7c59;
+            --light-bg: #f5e6ca;
+            --dark-bg: #2c3e50;
+            --light-text: #f5e6ca;
+            --dark-text: #333;
+            --accent-color: #5c946e;
+            --border-radius: 8px;
+            --transition-speed: 0.3s;
+        }
+
+        /* Base Styles */
+        body {
+            font-family: 'Press Start 2P', Courier, monospace;
+            background-color: var(--light-bg);
+            color: var(--dark-text);
+            line-height: 1.6;
+            transition: background-color var(--transition-speed);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        body.dark-theme {
+            background-color: var(--dark-bg);
+            color: var(--light-text);
+        }
+
+        /* Typography */
+        h1, h2, h3 {
+            text-align: center;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+        }
+
+        p {
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            text-align: center;
+        }
+
+        /* Layout Containers */
+        .game-container {
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .screen {
+            background-color: var(--light-bg);
+            border: 4px solid var(--primary-color);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            width: 100%;
+            max-width: 600px;
+            margin-bottom: 1rem;
+            display: none;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        .dark-theme .screen {
+            background-color: #1a2530;
+            border-color: #3a5a40;
+        }
+
+        /* Buttons and UI Elements */
+        .btn {
+            background-color: var(--primary-color);
+            color: var(--light-text);
+            border: none;
+            padding: 0.75rem 1.5rem;
+            margin: 0.5rem;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 1rem;
+            transition: background-color var(--transition-speed);
+        }
+
+        .btn:hover {
+            background-color: var(--accent-color);
+        }
+
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: 1rem 0;
+        }
+
+        .icon-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.5rem;
+            color: var(--primary-color);
+        }
+
+        /* Game Specific UI */
+        .forest-scene {
+            position: relative;
+            width: 100%;
+            height: 300px;
+            margin: 1rem 0;
+            border: 2px solid var(--primary-color);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            background-color: #a0d995;
+        }
+
+        .bird {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            background-size: contain;
+            background-repeat: no-repeat;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+
+        .bird:hover {
+            transform: scale(1.1);
+        }
+
+        .player-bird {
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 50"><circle cx="25" cy="25" r="20" fill="%231E88E5"/><circle cx="18" cy="18" r="3" fill="white"/><path d="M15 30 Q25 40 35 30" stroke="yellow" fill="transparent" stroke-width="3"/><path d="M35 22 L 45 15" stroke="%23333" fill="transparent" stroke-width="2"/><path d="M35 28 L 45 35" stroke="%23333" fill="transparent" stroke-width="2"/></svg>');
+            bottom: 20px;
+            left: 45%;
+            z-index: 10;
+        }
+
+        .tree {
+            position: absolute;
+            width: 80px;
+            height: 150px;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 150"><rect x="35" y="50" width="10" height="100" fill="%23795548"/><circle cx="40" cy="40" r="30" fill="%234CAF50"/></svg>');
+            background-size: contain;
+            background-repeat: no-repeat;
+        }
+
+        .dialog-box {
+            background-color: rgba(255, 255, 255, 0.9);
+            border: 2px solid var(--primary-color);
+            border-radius: var(--border-radius);
+            padding: 1rem;
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            text-align: center;
+        }
+
+        .dark-theme .dialog-box {
+            background-color: rgba(42, 54, 59, 0.9);
+        }
+
+        .memory-journal {
+            max-height: 200px;
+            overflow-y: auto;
+            padding: 0.5rem;
+            border: 2px solid var(--primary-color);
+            border-radius: var(--border-radius);
+            margin: 1rem 0;
+        }
+
+        .memory-item {
+            margin-bottom: 0.5rem;
+            padding: 0.5rem;
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: var(--border-radius);
+        }
+
+        .dark-theme .memory-item {
+            background-color: rgba(42, 54, 59, 0.8);
+        }
+
+        .bird-collection {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 0.5rem;
+            margin: 1rem 0;
+        }
+
+        .bird-icon {
+            width: 40px;
+            height: 40px;
+            border: 2px solid transparent;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .bird-icon.active {
+            border-color: var(--primary-color);
+        }
+
+        .navigation-controls {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .nav-btn {
+            width: 40px;
+            height: 40px;
+            background-color: var(--primary-color);
+            color: var(--light-text);
+            border: none;
+            border-radius: var(--border-radius);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .nav-btn:hover {
+            background-color: var(--accent-color);
+        }
+
+        /* Settings Form */
+        .settings-form {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .form-group {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .form-group input[type="text"] {
+            padding: 0.5rem;
+            border: 2px solid var(--primary-color);
+            border-radius: var(--border-radius);
+            font-family: inherit;
+            width: 60%;
+        }
+
+        .theme-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--primary-color);
+        }
+
+        /* Animations */
+        @keyframes float {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0); }
+        }
+
+        .floating {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 600px) {
+            .btn {
+                padding: 0.5rem 1rem;
+                font-size: 0.9rem;
+            }
+
+            .forest-scene {
+                height: 250px;
+            }
+
+            .form-group {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+
+            .form-group input[type="text"] {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <!-- Start Screen -->
+        <div class="screen" id="start-screen" style="display: block;">
+            <h1>Feathers of Memory</h1>
+            <p>You wake up feeling disoriented, your mind is foggy and your wings are stiff. The forest around you seems familiar but strange...</p>
+            <div class="btn-container">
+                <button class="btn" id="start-game-btn">Start Game</button>
+                <button class="btn" id="settings-btn">Settings</button>
+            </div>
+        </div>
+
+        <!-- Main Game Screen -->
+        <div class="screen" id="game-screen">
+            <div class="header-controls">
+                <button class="icon-btn" id="settings-icon">⚙️</button>
+                <button class="icon-btn" id="journal-icon">📖</button>
+            </div>
+            <div class="forest-scene" id="game-scene">
+                <!-- Birds and trees will be dynamically added here -->
+                <div class="bird player-bird" id="player"></div>
+            </div>
+            <div class="dialog-box" id="dialog-box">
+                You look around and see some birds, try to ask them about what happened.
+            </div>
+            <div class="navigation-controls">
+                <button class="nav-btn" id="nav-left">←</button>
+                <button class="nav-btn" id="nav-up">↑</button>
+                <button class="nav-btn" id="nav-down">↓</button>
+                <button class="nav-btn" id="nav-right">→</button>
+            </div>
+        </div>
+
+        <!-- Memory Journal Screen -->
+        <div class="screen" id="journal-screen">
+            <h2>Memory Journal</h2>
+            <button class="close-btn" id="close-journal">✕</button>
+            <div id="journal-content" class="memory-journal">
+                <p id="no-memories">No memories collected yet...</p>
+            </div>
+            <h3>Birds Collected</h3>
+            <div class="bird-collection" id="bird-collection">
+                <!-- Bird icons will be added here -->
+            </div>
+            <div class="btn-container">
+                <button class="btn" id="back-to-game">Back to Game</button>
+            </div>
+        </div>
+
+        <!-- Settings Screen -->
+        <div class="screen" id="settings-screen">
+            <h2>Settings</h2>
+            <button class="close-btn" id="close-settings">✕</button>
+            <div class="settings-form">
+                <div class="form-group">
+                    <label for="player-name">Player Name:</label>
+                    <input type="text" id="player-name" placeholder="Enter your name">
+                </div>
+                <div class="form-group">
+                    <label>Theme:</label>
+                    <div class="theme-buttons">
+                        <button class="btn" id="dark-theme-btn">Dark</button>
+                        <button class="btn" id="light-theme-btn">Light</button>
+                    </div>
+                </div>
+                <div class="btn-container">
+                    <button class="btn" id="save-settings">Save</button>
+                    <button class="btn" id="load-settings">Load</button>
+                    <button class="btn" id="delete-settings">Delete</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dialogue Interaction Screen -->
+        <div class="screen" id="dialogue-screen">
+            <h2>Conversation</h2>
+            <button class="close-btn" id="close-dialogue">✕</button>
+            <div id="bird-image" class="bird-image" style="text-align: center; margin: 1rem 0;">
+                <!-- Bird image will be placed here -->
+            </div>
+            <div id="dialogue-text" class="dialog-box">
+                <!-- Dialogue text will be placed here -->
+            </div>
+            <div class="btn-container" id="dialogue-options">
+                <!-- Dialogue options will be placed here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Game state
+        const gameState = {
+            currentScreen: 'start',
+            player: {
+                name: 'Bluey',
+                currentForm: 'blue-bird',
+                memories: [],
+                position: { x: 0, y: 0 },
+                unlockedForms: ['blue-bird']
+            },
+            settings: {
+                theme: 'light'
+            },
+            currentLocation: 'forest-clearing',
+            locations: {
+                'forest-clearing': {
+                    title: 'Forest Clearing',
+                    description: 'A small opening in the forest with dappled sunlight.',
+                    birds: ['robin', 'bluebird'],
+                    exits: {
+                        north: 'tall-trees',
+                        east: 'pond',
+                        south: null,
+                        west: null
+                    }
+                },
+                'tall-trees': {
+                    title: 'Tall Trees',
+                    description: 'Towering trees reach high into the sky.',
+                    birds: ['woodpecker', 'owl'],
+                    exits: {
+                        north: null,
+                        east: 'mountain-path',
+                        south: 'forest-clearing',
+                        west: null
+                    }
+                },
+                'pond': {
+                    title: 'Serene Pond',
+                    description: 'A calm pond reflects the clouds above.',
+                    birds: ['duck', 'heron'],
+                    exits: {
+                        north: 'mountain-path',
+                        east: null,
+                        south: null,
+                        west: 'forest-clearing'
+                    }
+                },
+                'mountain-path': {
+                    title: 'Mountain Path',
+                    description: 'A winding path leading up the mountain.',
+                    birds: ['eagle', 'sparrow'],
+                    exits: {
+                        north: null,
+                        east: null,
+                        south: 'pond',
+                        west: 'tall-trees'
+                    }
+                }
+            },
+            birds: {
+                'robin': {
+                    name: 'Robin',
+                    color: '#b25d51',
+                    icon: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 50"><circle cx="25" cy="25" r="20" fill="%23b25d51"/><circle cx="18" cy="18" r="3" fill="white"/><path d="M15 30 Q25 37 35 30" stroke="%23663931" fill="transparent" stroke-width="3"/></svg>',
+                    position: { x: 30, y: 70 },
+                    memory: 'You remember playing with other birds in the meadow, feeling the warmth of the sun on your feathers.',
+                    ability: 'singing',
+                    dialogue: {
+                        greeting: "Hello there! You look lost. I've been watching you sleep for a while.",
+                        options: [
+                            {
+                                text: "Who am I?",
+                                response: "You're a bird, like me! Though you look different from when I last saw you. Something happened in the thunderstorm last night."
+                            },
+                            {
+                                text: "Where am I?",
+                                response: "You're in the great forest! This is where many birds live. You've been here before, don't you remember?"
+                            },
+                            {
+                                text: "What happened to me?",
+                                response: "There was a storm. Lightning struck the big oak tree. I saw you fall... your feathers scattered everywhere. I've been waiting for you to wake up."
+                            }
+                        ]
+                    }
+                },
+                'bluebird': {
+                    name: 'Bluebird',
+                    color: '#1E88E5',
+                    icon: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 50"><circle cx="25" cy="25" r="20" fill="%231E88E5"/><circle cx="18" cy="18" r="3" fill="white"/><path d="M15 30 Q25 37 35 30" stroke="%230D47A1" fill="transparent" stroke-width="3"/></svg>',
+                    position: { x: 70, y: 30 },
+                    memory: 'You remember soaring high above the trees, feeling the wind rush through your feathers.',
+                    ability: 'gliding',
+                    dialogue: {
+                        greeting: "Oh! Another bluebird! We don't see many of our kind around here.",
+                        options: [
+                            {
+                                text: "Do you know me?",
+                                response: "You do look familiar... Were you the one who used to sing by the waterfall? Your melodies were beautiful."
+                            },
+                            {
+                                text: "What's special about bluebirds?",
+                                response: "We can glide farther than other birds, using warm air currents. Maybe if you find more of your memories, you'll remember how to do it too."
+                            },
+                            {
+                                text: "Have you seen any lost feathers?",
+                                response: "Hmm, I did see some strange glowing feathers by the tall trees to the north. They seemed magical somehow."
+                            }
+                        ]
+                    }
+                },
+                'woodpecker': {
+                    name: 'Woodpecker',
+                    color: '#d32f2f',
+                    icon: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 50"><circle cx="25" cy="25" r="20" fill="%23d32f2f"/><circle cx="18" cy="18" r="3" fill="white"/><path d="M35 25 L 45 25" stroke="black" fill="transparent" stroke-width="3"/><circle cx="25" cy="12" r="5" fill="black"/></svg>',
+                    position: { x: 20, y: 50 },
+                    memory: 'You remember the rhythm of raindrops on leaves, creating nature\'s melody.',
+                    ability: 'drumming',
+                    dialogue: {
+                        greeting: "Tap-tap-tap! Hello there! You look like you've lost your rhythm.",
+                        options: [
+                            {
+                                text: "What are you doing?",
+                                response: "I'm sending messages through the trees! Woodpeckers communicate through drumming. Each pattern means something different."
+                            },
+                            {
+                                text: "Did you see the storm?",
+                                response: "I sure did! I was safely in my hollow, but I saw a bright light hit the ancient oak. Many strange things fell from the sky that night."
+                            },
+                            {
+                                text: "Can you teach me to drum?",
+                                response: "Your form isn't quite right for it now, but find more of your memories and maybe you'll discover new abilities!"
+                            }
+                        ]
+                    }
+                },
+                'owl': {
+                    name: 'Owl',
+                    color: '#795548',
+                    icon: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 50"><circle cx="25" cy="25" r="20" fill="%23795548"/><circle cx="18" cy="18" r="3" fill="white"/><circle cx="32" cy="18" r="3" fill="white"/><path d="M15 15 L 10 10" stroke="%23593f35" stroke-width="2"/><path d="M35 15 L 40 10" stroke="%23593f35" stroke-width="2"/></svg>',
+                    position: { x: 80, y: 20 },
+                    memory: 'You remember seeing the world from above at night, with the moon lighting your path.',
+                    ability: 'night-vision',
+                    dialogue: {
+                        greeting: "Who... who? Ah, the lost one. I've been expecting you.",
+                        options: [
+                            {
+                                text: "How do you know about me?",
+                                response: "I see many things from my perch. I watched your transformation. You were once a great bird, with many forms."
+                            },
+                            {
+                                text: "What happened to my memories?",
+                                response: "They've been scattered as feathers across the land. Each one you collect will restore a piece of yourself."
+                            },
+                            {
+                                text: "Are you wise?",
+                                response: "Wisdom comes from experience, and you have lost yours. Find your memories, and you might become wiser than I."
+                            }
+                        ]
+                    }
+                }
+            },
+            currentDialogue: null
+        };
+
+        // DOM Elements
+        const screens = {
+            startScreen: document.getElementById('start-screen'),
+            gameScreen: document.getElementById('game-screen'),
+            journalScreen: document.getElementById('journal-screen'),
+            settingsScreen: document.getElementById('settings-screen'),
+            dialogueScreen: document.getElementById('dialogue-screen')
+        };
+
+        const elements = {
+            startGameBtn: document.getElementById('start-game-btn'),
+            settingsBtn: document.getElementById('settings-btn'),
+            settingsIcon: document.getElementById('settings-icon'),
+            journalIcon: document.getElementById('journal-icon'),
+            gameScene: document.getElementById('game-scene'),
+            dialogBox: document.getElementById('dialog-box'),
+            playerBird: document.getElementById('player'),
+            journalContent: document.getElementById('journal-content'),
+            noMemories: document.getElementById('no-memories'),
+            birdCollection: document.getElementById('bird-collection'),
+            backToGameBtn: document.getElementById('back-to-game'),
+            playerNameInput: document.getElementById('player-name'),
+            darkThemeBtn: document.getElementById('dark-theme-btn'),
+            lightThemeBtn: document.getElementById('light-theme-btn'),
+            saveSettingsBtn: document.getElementById('save-settings'),
+            loadSettingsBtn: document.getElementById('load-settings'),
+            deleteSettingsBtn: document.getElementById('delete-settings'),
+            closeSettingsBtn: document.getElementById('close-settings'),
+            closeJournalBtn: document.getElementById('close-journal'),
+            closeDialogueBtn: document.getElementById('close-dialogue'),
+            dialogueText: document.getElementById('dialogue-text'),
+            dialogueOptions: document.getElementById('dialogue-options'),
+            birdImage: document.getElementById('bird-image'),
+            navButtons: {
+                left: document.getElementById('nav-left'),
+                up: document.getElementById('nav-up'),
+                down: document.getElementById('nav-down'),
+                right: document.getElementById('nav-right')
+            }
+        };
+
+        // Initialize the game
+        function initGame() {
+            loadGame();
+            applyTheme();
+            attachEventListeners();
+            updateNavButtons();
+        }
+
+        // Screen Management
+        function showScreen(screenId) {
+            gameState.currentScreen = screenId.replace('-screen', '');
+            
+            // Hide all screens
+            Object.values(screens).forEach(screen => {
+                screen.style.display = 'none';
+            });
+            
+            // Show requested screen
+            screens[screenId].style.display = 'block';
+            
+            // Special screen initialization
+            if (screenId === 'game-screen') {
+                renderGameScene();
+            } else if (screenId === 'journal-screen') {
+                renderJournal();
+            }
+        }
+
+        // Event Listeners
+        function attachEventListeners() {
+            // Start Screen
+            elements.startGameBtn.addEventListener('click', () => showScreen('game-screen'));
+            elements.settingsBtn.addEventListener('click', () => showScreen('settings-screen'));
+            
+            // Game Screen
+            elements.settingsIcon.addEventListener('click', () => showScreen('settings-screen'));
+            elements.journalIcon.addEventListener('click', () => showScreen('journal-screen'));
+            
+            // Journal Screen
+            elements.backToGameBtn.addEventListener('click', () => showScreen('game-screen'));
+            elements.closeJournalBtn.addEventListener('click', () => showScreen('game-screen'));
+            
+            // Settings Screen
+            elements.closeSettingsBtn.addEventListener('click', () => {
+                if (gameState.currentScreen === 'start') {
+                    showScreen('start-screen');
+                } else {
+                    showScreen('game-screen');
+                }
+            });
+            
+            elements.darkThemeBtn.addEventListener('click', () => {
+                gameState.settings.theme = 'dark';
+                applyTheme();
+                saveGame();
+            });
+            
+            elements.lightThemeBtn.addEventListener('click', () => {
+                gameState.settings.theme = 'light';
+                applyTheme();
+                saveGame();
+            });
+            
+            elements.saveSettingsBtn.addEventListener('click', () => {
+                gameState.player.name = elements.playerNameInput.value || 'Bluey';
+                saveGame();
+                alert('Settings saved!');
+            });
+            
+            elements.loadSettingsBtn.addEventListener('click', () => {
+                loadGame();
+                elements.playerNameInput.value = gameState.player.name;
+                applyTheme();
+                alert('Settings loaded!');
+            });
+            
+            elements.deleteSettingsBtn.addEventListener('click', () => {
+                if (confirm('Are you sure you want to delete all saved data?')) {
+                    localStorage.removeItem('feathersOfMemory');
+                    resetGame();
+                    alert('All data deleted!');
+                }
+            });
+            
+            // Dialogue Screen
+            elements.closeDialogueBtn.addEventListener('click', () => {
+                showScreen('game-screen');
+            });
+            
+            // Navigation Controls
+            elements.navButtons.left.addEventListener('click', () => movePlayer('west'));
+            elements.navButtons.right.addEventListener('click', () => movePlayer('east'));
+            elements.navButtons.up.addEventListener('click', () => movePlayer('north'));
+            elements.navButtons.down.addEventListener('click', () => movePlayer('south'));
+            
+            // Keyboard Navigation
+            document.addEventListener('keydown', (e) => {
+                if (gameState.currentScreen !== 'game') return;
+                
+                switch(e.key) {
+                    case 'ArrowLeft':
+                        movePlayer('west');
+                        break;
+                    case 'ArrowRight':
+                        movePlayer('east');
+                        break;
+                    case 'ArrowUp':
+                        movePlayer('north');
+                        break;
+                    case 'ArrowDown':
+                        movePlayer('south');
+                        break;
+                }
+            });
+        }
+
+        // Theme Management
+        function applyTheme() {
+            if (gameState.settings.theme === 'dark') {
+                document.body.classList.add('dark-theme');
+            } else {
+                document.body.classList.remove('dark-theme');
+            }
+        }
+
+        // Game Save/Load Management
+        function saveGame() {
+            try {
+                localStorage.setItem('feathersOfMemory', JSON.stringify({
+                    player: gameState.player,
+                    settings: gameState.settings,
+                    currentLocation: gameState.currentLocation
+                }));
+            } catch (error) {
+                console.error('Failed to save game:', error);
+            }
+        }
+
+        function loadGame() {
+            try {
+                const savedGame = localStorage.getItem('feathersOfMemory');
+                if (savedGame) {
+                    const parsedData = JSON.parse(savedGame);
+                    gameState.player = parsedData.player || gameState.player;
+                    gameState.settings = parsedData.settings || gameState.settings;
+                    gameState.currentLocation = parsedData.currentLocation || gameState.currentLocation;
+                    
+                    // Update UI with loaded data
+                    elements.playerNameInput.value = gameState.player.name;
+                }
+            } catch (error) {
+                console.error('Failed to load game:', error);
+            }
+        }
+
+        function resetGame() {
+            gameState.player = {
+                name: 'Bluey',
+                currentForm: 'blue-bird',
+                memories: [],
+                position: { x: 0, y: 0 },
+                unlockedForms: ['blue-bird']
+            };
+            gameState.settings = {
+                theme: 'light'
+            };
+            gameState.currentLocation = 'forest-clearing';
+            
+            elements.playerNameInput.value = gameState.player.name;
+            applyTheme();
+        }
+
+        // Game Logic
+        function renderGameScene() {
+            // Clear existing birds (except player)
+            const birdElements = elements.gameScene.querySelectorAll('.bird:not(#player)');
+            birdElements.forEach(bird => bird.remove());
+            
+            // Clear existing trees
+            const treeElements = elements.gameScene.querySelectorAll('.tree');
+            treeElements.forEach(tree => tree.remove());
+            
+            // Get current location
+            const location = gameState.locations[gameState.currentLocation];
+            
+            // Update dialog box with location description
+            elements.dialogBox.textContent = location.description;
+            
+            // Add trees (randomly positioned)
+            for (let i = 0; i < 3; i++) {
+                const tree = document.createElement('div');
+                tree.className = 'tree';
+                tree.style.left = `${Math.random() * 80}%`;
+                tree.style.top = `${Math.random() * 60}%`;
+                elements.gameScene.appendChild(tree);
+            }
+            
+            // Add birds for this location
+            location.birds.forEach(birdId => {
+                const birdData = gameState.birds[birdId];
+                if (!birdData) return;
+                
+                const bird = document.createElement('div');
+                bird.className = 'bird';
+                bird.dataset.id = birdId;
+                bird.style.backgroundImage = `url('${birdData.icon}')`;
+                bird.style.left = `${birdData.position.x}%`;
+                bird.style.top = `${birdData.position.y}%`;
+                
+                // Add click handler for bird interaction
+                bird.addEventListener('click', () => interactWithBird(birdId));
+                
+                elements.gameScene.appendChild(bird);
+            });
+            
+            updateNavButtons();
+        }
+        
+        function interactWithBird(birdId) {
+            const bird = gameState.birds[birdId];
+            if (!bird) return;
+            
+            gameState.currentDialogue = bird;
+            
+            // Prepare dialogue screen
+            elements.dialogueText.textContent = bird.dialogue.greeting;
+            elements.birdImage.innerHTML = `<div class="bird" style="background-image: url('${bird.icon}'); width: 80px; height: 80px; display: inline-block;"></div>`;
+            
+            // Clear previous options
+            elements.dialogueOptions.innerHTML = '';
+            
+            // Add dialogue options
+            bird.dialogue.options.forEach(option => {
+                const button = document.createElement('button');
+                button.className = 'btn';
+                button.textContent = option.text;
+                button.addEventListener('click', () => {
+                    elements.dialogueText.textContent = option.response;
+                    
+                    // Replace options with continue button
+                    elements.dialogueOptions.innerHTML = '';
+                    const continueBtn = document.createElement('button');
+                    continueBtn.className = 'btn';
+                    continueBtn.textContent = 'Continue';
+                    continueBtn.addEventListener('click', () => {
+                        // Check if this memory was already collected
+                        if (!gameState.player.memories.includes(bird.memory)) {
+                            // Add memory to journal
+                            gameState.player.memories.push(bird.memory);
+                            
+                            // If this bird form isn't unlocked yet, unlock it
+                            if (!gameState.player.unlockedForms.includes(birdId)) {
+                                gameState.player.unlockedForms.push(birdId);
+                                alert(`You've unlocked the ${bird.name} form with ${bird.ability} ability!`);
+                            }
+                            
+                            saveGame();
+                        }
+                        
+                        showScreen('game-screen');
+                    });
+                    
+                    elements.dialogueOptions.appendChild(continueBtn);
+                });
+                
+                elements.dialogueOptions.appendChild(button);
+            });
+            
+            showScreen('dialogue-screen');
+        }
+        
+        function movePlayer(direction) {
+            const currentLocation = gameState.locations[gameState.currentLocation];
+            const nextLocation = currentLocation.exits[direction];
+            
+            if (nextLocation) {
+                gameState.currentLocation = nextLocation;
+                renderGameScene();
+            } else {
+                // Show message that you can't go that way
+                elements.dialogBox.textContent = "You can't go that way.";
+                setTimeout(() => {
+                    elements.dialogBox.textContent = gameState.locations[gameState.currentLocation].description;
+                }, 1500);
+            }
+        }
+        
+        function updateNavButtons() {
+            const exits = gameState.locations[gameState.currentLocation].exits;
+            
+            // Enable/disable navigation buttons based on available exits
+            elements.navButtons.left.disabled = !exits.west;
+            elements.navButtons.right.disabled = !exits.east;
+            elements.navButtons.up.disabled = !exits.north;
+            elements.navButtons.down.disabled = !exits.south;
+            
+            // Visual indication of available paths
+            Object.entries(elements.navButtons).forEach(([direction, button]) => {
+                if (direction === 'left' && !exits.west) button.style.opacity = '0.5';
+                else if (direction === 'right' && !exits.east) button.style.opacity = '0.5';
+                else if (direction === 'up' && !exits.north) button.style.opacity = '0.5';
+                else if (direction === 'down' && !exits.south) button.style.opacity = '0.5';
+                else button.style.opacity = '1';
+            });
+        }
+        
+        function renderJournal() {
+            // Update memories list
+            if (gameState.player.memories.length > 0) {
+                elements.noMemories.style.display = 'none';
+                
+                // Clear previous memories
+                const existingMemories = elements.journalContent.querySelectorAll('.memory-item');
+                existingMemories.forEach(item => item.remove());
+                
+                // Add each memory
+                gameState.player.memories.forEach(memory => {
+                    const memoryItem = document.createElement('div');
+                    memoryItem.className = 'memory-item';
+                    memoryItem.textContent = memory;
+                    elements.journalContent.appendChild(memoryItem);
+                });
+            } else {
+                elements.noMemories.style.display = 'block';
+            }
+            
+            // Update bird collection
+            elements.birdCollection.innerHTML = '';
+            gameState.player.unlockedForms.forEach(formId => {
+                const bird = gameState.birds[formId];
+                if (!bird) return;
+                
+                const birdIcon = document.createElement('div');
+                birdIcon.className = 'bird-icon';
+                birdIcon.style.backgroundImage = `url('${bird.icon}')`;
+                
+                if (gameState.player.currentForm === formId) {
+                    birdIcon.classList.add('active');
+                }
+                
+                birdIcon.addEventListener('click', () => {
+                    gameState.player.currentForm = formId;
+                    saveGame();
+                    
+                    // Update player appearance
+                    elements.playerBird.style.backgroundImage = `url('${bird.icon}')`;
+                    
+                    // Update active state
+                    const allIcons = elements.birdCollection.querySelectorAll('.bird-icon');
+                    allIcons.forEach(icon => icon.classList.remove('active'));
+                    birdIcon.classList.add('active');
+                    
+                    alert(`You transformed into a ${bird.name}! You can now use the ${bird.ability} ability.`);
+                });
+                
+                elements.birdCollection.appendChild(birdIcon);
+            });
+        }
+        
+        // Initialize the game
+        window.addEventListener('DOMContentLoaded', initGame);
+    </script>
+</body>
+</html>
