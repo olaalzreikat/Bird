@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bird Collector Game</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #87CEEB;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .header {
+            background-color: #4682B4;
+            color: white;
+            padding: 10px;
+            text-align: center;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .stats {
+            display: flex;
+            gap: 20px;
+        }
+
+        .stat {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .game-container {
+            flex: 1;
+            position: relative;
+            background-image: url('/api/placeholder/800/600');
+            background-size: cover;
+            overflow: hidden;
+        }
+
+        .bird {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            background-size: contain;
+            background-repeat: no-repeat;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .bird:hover {
+            transform: scale(1.1);
+        }
+
+        .feather {
+            position: absolute;
+            width: 20px;
+            height: 30px;
+            background-color: #f8f8f8;
+            border-radius: 50% 50% 50% 0;
+            transform: rotate(-45deg);
+            animation: float 3s ease-in-out infinite;
+            cursor: pointer;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: rotate(-45deg) translateY(0); }
+            50% { transform: rotate(-45deg) translateY(-10px); }
+        }
+
+        .shop-panel {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            background-color: rgba(255, 255, 255, 0.9);
+            border-top-left-radius: 10px;
+            padding: 15px;
+            display: none;
+            max-height: 70%;
+            overflow-y: auto;
+            width: 300px;
+        }
+
+        .shop-button {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            padding: 10px 15px;
+            background-color: #4682B4;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            z-index: 10;
+        }
+
+        .bird-card {
+            display: flex;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+            margin-bottom: 10px;
+            align-items: center;
+            background-color: white;
+        }
+
+        .bird-image {
+            width: 50px;
+            height: 50px;
+            margin-right: 10px;
+            background-size: contain;
+            background-repeat: no-repeat;
+        }
+
+        .bird-info {
+            flex: 1;
+        }
+
+        .unlock-button {
+            padding: 5px 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
+        .unlock-button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 10px 20px;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            border-radius: 5px;
+            display: none;
+            z-index: 100;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Bird Collector</h1>
+        <div class="stats">
+            <div class="stat">
+                <span>Feathers:</span>
+                <span id="feather-count">0</span>
+            </div>
+            <div class="stat">
+                <span>Birds Unlocked:</span>
+                <span id="bird-count">1</span>/10
+            </div>
+        </div>
+    </div>
+
+    <div class="game-container" id="game-container">
+        <!-- Birds and feathers will be generated here -->
+    </div>
+
+    <button class="shop-button" id="shop-button">Bird Shop</button>
+
+    <div class="shop-panel" id="shop-panel">
+        <h2>Unlock New Birds</h2>
+        <div id="bird-shop"></div>
+    </div>
+
+    <div class="notification" id="notification"></div>
+
+    <script>
+        // Game State
+        const gameState = {
+            feathers: 0,
+            unlockedBirds: ['sparrow'],
+            activeBirds: [],
+            activeFeathers: [],
+            birdTypes: [
+                {
+                    id: 'sparrow',
+                    name: 'Sparrow',
+                    color: '#A0522D',
+                    featherValue: 1,
+                    unlocked: true,
+                    cost: 0
+                },
+                {
+                    id: 'robin',
+                    name: 'Robin',
+                    color: '#CD5C5C',
+                    featherValue: 2,
+                    unlocked: false,
+                    cost: 10
+                },
+                {
+                    id: 'bluejay',
+                    name: 'Blue Jay',
+                    color: '#1E90FF',
+                    featherValue: 3,
+                    unlocked: false,
+                    cost: 25
+                },
+                {
+                    id: 'cardinal',
+                    name: 'Cardinal',
+                    color: '#DC143C',
+                    featherValue: 4,
+                    unlocked: false,
+                    cost: 50
+                },
+                {
+                    id: 'goldfinch',
+                    name: 'Goldfinch',
+                    color: '#FFD700',
+                    featherValue: 5,
+                    unlocked: false,
+                    cost: 100
+                },
+                {
+                    id: 'woodpecker',
+                    name: 'Woodpecker',
+                    color: '#B22222',
+                    featherValue: 6,
+                    unlocked: false,
+                    cost: 150
+                },
+                {
+                    id: 'hummingbird',
+                    name: 'Hummingbird',
+                    color: '#9932CC',
+                    featherValue: 7,
+                    unlocked: false,
+                    cost: 200
+                },
+                {
+                    id: 'owl',
+                    name: 'Owl',
+                    color: '#8B4513',
+                    featherValue: 8,
+                    unlocked: false,
+                    cost: 300
+                },
+                {
+                    id: 'eagle',
+                    name: 'Eagle',
+                    color: '#2F4F4F',
+                    featherValue: 10,
+                    unlocked: false,
+                    cost: 500
+                },
+                {
+                    id: 'peacock',
+                    name: 'Peacock',
+                    color: '#4169E1',
+                    featherValue: 15,
+                    unlocked: false,
+                    cost: 1000
+                }
+            ]
+        };
+
+        // DOM Elements
+        const gameContainer = document.getElementById('game-container');
+        const featherCountElement = document.getElementById('feather-count');
+        const birdCountElement = document.getElementById('bird-count');
+        const shopButton = document.getElementById('shop-button');
+        const shopPanel = document.getElementById('shop-panel');
+        const birdShop = document.getElementById('bird-shop');
+        const notification = document.getElementById('notification');
+
+        // Initialize Game
+        function initGame() {
+            updateStats();
+            populateShop();
+            setInterval(spawnBird, 3000);
+            
+            // Event Listeners
+            shopButton.addEventListener('click', toggleShop);
+            
+            // Initial bird spawn
+            spawnBird();
+        }
+
+        // Update Stats Display
+        function updateStats() {
+            featherCountElement.textContent = gameState.feathers;
+            birdCountElement.textContent = gameState.unlockedBirds.length;
+        }
+
+        // Toggle Shop Panel
+        function toggleShop() {
+            shopPanel.style.display = shopPanel.style.display === 'none' || shopPanel.style.display === '' ? 'block' : 'none';
+        }
+
+        // Populate Bird Shop
+        function populateShop() {
+            birdShop.innerHTML = '';
+            
+            gameState.birdTypes.forEach(bird => {
+                if (!bird.unlocked) {
+                    const birdCard = document.createElement('div');
+                    birdCard.className = 'bird-card';
+                    
+                    const birdImage = document.createElement('div');
+                    birdImage.className = 'bird-image';
+                    birdImage.style.backgroundColor = bird.color;
+                    
+                    const birdInfo = document.createElement('div');
+                    birdInfo.className = 'bird-info';
+                    birdInfo.innerHTML = `
+                        <h3>${bird.name}</h3>
+                        <p>Feather Value: ${bird.featherValue}</p>
+                        <p>Cost: ${bird.cost} feathers</p>
+                    `;
+                    
+                    const unlockButton = document.createElement('button');
+                    unlockButton.className = 'unlock-button';
+                    unlockButton.textContent = 'Unlock';
+                    unlockButton.disabled = gameState.feathers < bird.cost;
+                    
+                    unlockButton.addEventListener('click', () => unlockBird(bird.id));
+                    
+                    birdCard.appendChild(birdImage);
+                    birdCard.appendChild(birdInfo);
+                    birdCard.appendChild(unlockButton);
+                    
+                    birdShop.appendChild(birdCard);
+                }
+            });
+        }
+
+        // Spawn a Bird
+        function spawnBird() {
+            // Only spawn if we have fewer than 5 birds at once
+            if (gameState.activeBirds.length >= 5) return;
+            
+            // Randomly select from unlocked birds
+            const unlockedBirdTypes = gameState.birdTypes.filter(bird => bird.unlocked);
+            const randomBird = unlockedBirdTypes[Math.floor(Math.random() * unlockedBirdTypes.length)];
+            
+            const birdElement = document.createElement('div');
+            birdElement.className = 'bird';
+            birdElement.style.backgroundColor = randomBird.color;
+            birdElement.dataset.birdId = randomBird.id;
+            birdElement.dataset.featherValue = randomBird.featherValue;
+            
+            // Random position
+            const left = Math.random() * (gameContainer.offsetWidth - 60);
+            const top = Math.random() * (gameContainer.offsetHeight - 60);
+            birdElement.style.left = `${left}px`;
+            birdElement.style.top = `${top}px`;
+            
+            // Add click event
+            birdElement.addEventListener('click', handleBirdClick);
+            
+            // Add to game
+            gameContainer.appendChild(birdElement);
+            gameState.activeBirds.push(birdElement);
+            
+            // Despawn after random time
+            setTimeout(() => {
+                if (gameContainer.contains(birdElement)) {
+                    gameContainer.removeChild(birdElement);
+                    gameState.activeBirds = gameState.activeBirds.filter(bird => bird !== birdElement);
+                }
+            }, 5000 + Math.random() * 3000);
+        }
+
+        // Handle Bird Click
+        function handleBirdClick(event) {
+            const birdElement = event.target;
+            const birdId = birdElement.dataset.birdId;
+            const featherValue = parseInt(birdElement.dataset.featherValue);
+            
+            // Remove bird
+            gameContainer.removeChild(birdElement);
+            gameState.activeBirds = gameState.activeBirds.filter(bird => bird !== birdElement);
+            
+            // Spawn feathers
+            for (let i = 0; i < featherValue; i++) {
+                spawnFeather(
+                    parseInt(birdElement.style.left) + Math.random() * 40,
+                    parseInt(birdElement.style.top) + Math.random() * 40
+                );
+            }
+        }
+
+        // Spawn a Feather
+        function spawnFeather(x, y) {
+            const featherElement = document.createElement('div');
+            featherElement.className = 'feather';
+            featherElement.style.left = `${x}px`;
+            featherElement.style.top = `${y}px`;
+            
+            // Random color tint
+            const hue = Math.floor(Math.random() * 60);
+            featherElement.style.backgroundColor = `hsl(${hue}, 100%, 95%)`;
+            
+            // Add click event
+            featherElement.addEventListener('click', handleFeatherClick);
+            
+            // Add to game
+            gameContainer.appendChild(featherElement);
+            gameState.activeFeathers.push(featherElement);
+            
+            // Feathers disappear after some time
+            setTimeout(() => {
+                if (gameContainer.contains(featherElement)) {
+                    gameContainer.removeChild(featherElement);
+                    gameState.activeFeathers = gameState.activeFeathers.filter(feather => feather !== featherElement);
+                }
+            }, 8000);
+        }
+
+        // Handle Feather Click
+        function handleFeatherClick(event) {
+            const featherElement = event.target;
+            
+            // Add to feather count
+            gameState.feathers++;
+            updateStats();
+            
+            // Remove feather
+            gameContainer.removeChild(featherElement);
+            gameState.activeFeathers = gameState.activeFeathers.filter(feather => feather !== featherElement);
+            
+            // Update shop buttons
+            populateShop();
+            
+            // Show a floating +1
+            showFloatingText('+1', event.clientX, event.clientY);
+        }
+
+        // Unlock a Bird
+        function unlockBird(birdId) {
+            const bird = gameState.birdTypes.find(b => b.id === birdId);
+            
+            if (gameState.feathers >= bird.cost) {
+                // Deduct feathers
+                gameState.feathers -= bird.cost;
+                
+                // Unlock bird
+                bird.unlocked = true;
+                gameState.unlockedBirds.push(bird.id);
+                
+                // Update UI
+                updateStats();
+                populateShop();
+                
+                // Show notification
+                showNotification(`Unlocked ${bird.name}!`);
+            }
+        }
+
+        // Show Notification
+        function showNotification(message) {
+            notification.textContent = message;
+            notification.style.display = 'block';
+            
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 3000);
+        }
+
+        // Show Floating Text
+        function showFloatingText(text, x, y) {
+            const floatingText = document.createElement('div');
+            floatingText.textContent = text;
+            floatingText.style.position = 'absolute';
+            floatingText.style.left = `${x}px`;
+            floatingText.style.top = `${y}px`;
+            floatingText.style.color = '#4CAF50';
+            floatingText.style.fontWeight = 'bold';
+            floatingText.style.pointerEvents = 'none';
+            floatingText.style.zIndex = '100';
+            
+            document.body.appendChild(floatingText);
+            
+            // Animate
+            let opacity = 1;
+            let posY = y;
+            
+            const animation = setInterval(() => {
+                opacity -= 0.05;
+                posY -= 2;
+                
+                floatingText.style.opacity = opacity;
+                floatingText.style.top = `${posY}px`;
+                
+                if (opacity <= 0) {
+                    clearInterval(animation);
+                    document.body.removeChild(floatingText);
+                }
+            }, 50);
+        }
+
+        // Start the game
+        window.onload = initGame;
+    </script>
+</body>
+</html>
