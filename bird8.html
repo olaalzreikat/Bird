@@ -1,0 +1,1540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced Bird-Friendly Garden Planner</title>
+    <style>
+        /* CSS Variables for Theming */
+        :root {
+            /* Light Theme (Default) */
+            --bg-primary: #f0f7f0;
+            --bg-secondary: #ffffff;
+            --text-primary: #333333;
+            --text-secondary: #555555;
+            --accent-primary: #2c7a39;
+            --accent-secondary: #1e5329;
+            --accent-light: #e6f3e9;
+            --accent-hover: #1e5329;
+            --danger: #e74c3c;
+            --header-text: #ffffff;
+            --card-bg: #e6f3e9;
+            --card-hover: #d1e7d5;
+            --border-color: #e6f3e9;
+            --shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Dark Theme */
+        .dark-theme {
+            --bg-primary: #222831;
+            --bg-secondary: #30475e;
+            --text-primary: #ececec;
+            --text-secondary: #c5c5c5;
+            --accent-primary: #4ecca3;
+            --accent-secondary: #3aa382;
+            --accent-light: #2c3440;
+            --accent-hover: #3aa382;
+            --danger: #e74c3c;
+            --header-text: #ececec;
+            --card-bg: #2c3440;
+            --card-hover: #374357;
+            --border-color: #2c3440;
+            --shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Autumn Theme */
+        .autumn-theme {
+            --bg-primary: #f5e8c7;
+            --bg-secondary: #fff3da;
+            --text-primary: #4e3620;
+            --text-secondary: #6b4932;
+            --accent-primary: #c16a29;
+            --accent-secondary: #a05623;
+            --accent-light: #f9efd8;
+            --accent-hover: #a05623;
+            --danger: #d64c3e;
+            --header-text: #fff3da;
+            --card-bg: #f9efd8;
+            --card-hover: #f0e4c5;
+            --border-color: #f9efd8;
+            --shadow: 0 2px 4px rgba(78, 54, 32, 0.1);
+        }
+
+        /* Ocean Theme */
+        .ocean-theme {
+            --bg-primary: #e6f4f7;
+            --bg-secondary: #ffffff;
+            --text-primary: #2c3e50;
+            --text-secondary: #34495e;
+            --accent-primary: #3498db;
+            --accent-secondary: #2980b9;
+            --accent-light: #d6eaf8;
+            --accent-hover: #2980b9;
+            --danger: #e74c3c;
+            --header-text: #ffffff;
+            --card-bg: #d6eaf8;
+            --card-hover: #c3ddf1;
+            --border-color: #d6eaf8;
+            --shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Global Reset */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            transition: background-color 0.3s ease;
+        }
+
+        /* Layout */
+        .container {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        header {
+            background-color: var(--accent-primary);
+            color: var(--header-text);
+            padding: 1rem;
+            box-shadow: var(--shadow);
+            transition: background-color 0.3s ease;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-title-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .header-subtitle {
+            color: var(--header-text);
+            opacity: 0.8;
+            font-size: 0.9rem;
+        }
+
+        .theme-controls {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .theme-selector {
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 0.3rem 0.5rem;
+            cursor: pointer;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        @media (min-width: 768px) {
+            .main-content {
+                flex-direction: row;
+            }
+        }
+
+        .sidebar {
+            background-color: var(--bg-secondary);
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            padding: 1rem;
+            transition: background-color 0.3s ease;
+        }
+
+        @media (min-width: 768px) {
+            .sidebar {
+                width: 33%;
+            }
+        }
+
+        .main-panel {
+            flex: 1;
+            background-color: var(--bg-secondary);
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            transition: background-color 0.3s ease;
+        }
+
+        footer {
+            background-color: var(--accent-primary);
+            color: var(--header-text);
+            text-align: center;
+            padding: 0.5rem;
+            font-size: 0.8rem;
+            transition: background-color 0.3s ease;
+        }
+
+        /* Components */
+        .roll-button {
+            background-color: var(--accent-primary);
+            color: var(--header-text);
+            border: none;
+            border-radius: 50px;
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            margin: 1rem auto;
+            transition: all 0.2s ease;
+        }
+
+        .roll-button:hover {
+            background-color: var(--accent-hover);
+            transform: scale(1.05);
+        }
+
+        .roll-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .save-button {
+            background-color: var(--accent-primary);
+            color: var(--header-text);
+            border: none;
+            border-radius: 4px;
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            transition: all 0.2s ease;
+            margin-top: 0.5rem;
+        }
+
+        .save-button:hover {
+            background-color: var(--accent-hover);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .bird-info {
+            margin-top: 1rem;
+        }
+
+        .bird-header {
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .bird-name {
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: var(--accent-secondary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .bird-description {
+            color: var(--accent-primary);
+            font-style: italic;
+        }
+
+        .tab-buttons {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .tab-button {
+            flex: 1;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 8px 8px 0 0;
+            background-color: var(--accent-light);
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .tab-button.active {
+            background-color: var(--accent-primary);
+            color: var(--header-text);
+        }
+
+        .bird-detail {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .detail-title {
+            font-weight: 600;
+            color: var(--accent-secondary);
+        }
+
+        .garden-tips-list {
+            list-style-position: inside;
+            padding-left: 1rem;
+        }
+
+        .garden-tips-list li {
+            margin-bottom: 0.5rem;
+            color: var(--accent-secondary);
+        }
+
+        .garden-elements-title {
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: var(--accent-secondary);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .category-section {
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .category-title {
+            font-weight: bold;
+            color: var(--accent-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .elements-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 0.5rem;
+        }
+
+        @media (min-width: 640px) {
+            .elements-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .elements-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        .element-card {
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 0.75rem;
+            background-color: var(--card-bg);
+            transition: background-color 0.3s ease;
+        }
+
+        .element-card:hover {
+            background-color: var(--card-hover);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .element-name {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .add-button, .remove-button {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: none;
+            color: var(--header-text);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .add-button {
+            background-color: var(--accent-primary);
+        }
+
+        .add-button:hover {
+            background-color: var(--accent-hover);
+        }
+
+        .remove-button {
+            background-color: var(--danger);
+        }
+
+        .remove-button:hover {
+            opacity: 0.9;
+        }
+
+        .element-zones {
+            font-size: 0.8rem;
+            color: var(--accent-secondary);
+        }
+
+        .benefits-list {
+            font-size: 0.85rem;
+            margin-top: 0.25rem;
+            color: var(--text-secondary);
+        }
+
+        .benefit-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.25rem;
+        }
+
+        .benefit-bullet {
+            color: var(--accent-primary);
+        }
+
+        .garden-plan {
+            margin-top: 1rem;
+        }
+
+        .empty-plan {
+            text-align: center;
+            padding: 2.5rem 0;
+            color: var(--accent-primary);
+        }
+
+        .saved-plans-section {
+            border-top: 1px solid var(--border-color);
+            margin-top: 1rem;
+            padding-top: 1rem;
+        }
+
+        .saved-plan-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem;
+            border-radius: 4px;
+            margin-bottom: 0.5rem;
+            background-color: var(--accent-light);
+        }
+
+        .saved-plan-item:hover {
+            background-color: var(--card-hover);
+        }
+
+        .saved-plan-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .plan-action-button {
+            background-color: var(--accent-primary);
+            color: var(--header-text);
+            border: none;
+            border-radius: 4px;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .plan-delete-button {
+            background-color: var(--danger);
+        }
+
+        .cookie-banner {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background-color: var(--accent-secondary);
+            color: var(--header-text);
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .cookie-button {
+            background-color: var(--header-text);
+            color: var(--accent-secondary);
+            border: none;
+            border-radius: 4px;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: var(--accent-primary);
+            color: var(--header-text);
+            padding: 1rem;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            z-index: 1000;
+            transform: translateX(150%);
+            transition: transform 0.3s ease;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* Icons */
+        .icon {
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            background-size: cover;
+            background-position: center;
+            filter: var(--icon-filter, none);
+        }
+
+        .dark-theme .icon {
+            --icon-filter: invert(1);
+        }
+
+        .icon-bird {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M16 7h.01'/%3E%3Cpath d='M3.4 18H12a8 8 0 0 0 8-8V7a4 4 0 0 0-7.28-2.3L2 20'/%3E%3Cpath d='m20 7 2 .5-2 .5'/%3E%3Cpath d='M10 18v3'/%3E%3Cpath d='M14 17.75V21'/%3E%3Cpath d='M7 18a6 6 0 0 0 3.84-10.61'/%3E%3C/svg%3E");
+        }
+
+        .icon-tree {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M8 19h8'/%3E%3Cpath d='M8 5.5a4 4 0 0 1 8 0'/%3E%3Cpath d='M12 7.5v13'/%3E%3Cpath d='M4 13.5a4 4 0 0 1 4-4c0-2.8 2.2-5 5-5a5 5 0 0 1 5 5 4 4 0 0 1 4 4'/%3E%3Cpath d='M16 19h2a2 2 0 0 0 0-4h-.5'/%3E%3Cpath d='M4 15.5h1.5'/%3E%3Cpath d='M8 15.5h1.5'/%3E%3C/svg%3E");
+        }
+
+        .icon-flower {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 7.5a4.5 4.5 0 1 1 4.5 4.5M12 7.5A4.5 4.5 0 1 0 7.5 12M12 7.5V9m-4.5 3a4.5 4.5 0 1 0 4.5 4.5M7.5 12H9m3 4.5a4.5 4.5 0 1 0 4.5-4.5M12 16.5V15m4.5-3a4.5 4.5 0 1 1-4.5-4.5M16.5 12H15'/%3E%3C/svg%3E");
+        }
+
+        .icon-home {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z'/%3E%3Cpolyline points='9 22 9 12 15 12 15 22'/%3E%3C/svg%3E");
+        }
+
+        .icon-water {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M7 16.3c2.2 0 4-1.83 4-4.05 0-1.16-.57-2.26-1.71-3.19S7.29 6.75 7 5.3c-.29 1.45-1.14 2.84-2.29 3.76S3 11.1 3 12.25c0 2.22 1.8 4.05 4 4.05z'/%3E%3Cpath d='M12.56 6.6A10.97 10.97 0 0 0 14 3.02c.5 2.5 2 4.9 4 6.5s3 3.5 3 5.5a6.98 6.98 0 0 1-11.91 4.97'/%3E%3C/svg%3E");
+        }
+
+        .icon-heart {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z'/%3E%3C/svg%3E");
+        }
+
+        .icon-plane {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z'/%3E%3C/svg%3E");
+        }
+
+        .icon-map {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z'/%3E%3Ccircle cx='12' cy='10' r='3'/%3E%3C/svg%3E");
+        }
+
+        .icon-egg {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 22c4.97 0 9-3.132 9-7s-4.03-8-9-8-9 4.132-9 8 4.03 7 9 7z'/%3E%3C/svg%3E");
+        }
+
+        .icon-save {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z'/%3E%3Cpolyline points='17 21 17 13 7 13 7 21'/%3E%3Cpolyline points='7 3 7 8 15 8'/%3E%3C/svg%3E");
+        }
+
+        .icon-load {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242'/%3E%3Cpath d='M12 12v9'/%3E%3Cpath d='m16 16-4-4-4 4'/%3E%3C/svg%3E");
+        }
+
+        .icon-delete {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 6h18'/%3E%3Cpath d='M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6'/%3E%3Cpath d='M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2'/%3E%3Cline x1='10' y1='11' x2='10' y2='17'/%3E%3Cline x1='14' y1='11' x2='14' y2='17'/%3E%3C/svg%3E");
+        }
+
+        .icon-theme {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='4'/%3E%3Cpath d='M12 2v2'/%3E%3Cpath d='M12 20v2'/%3E%3Cpath d='m4.93 4.93 1.41 1.41'/%3E%3Cpath d='m17.66 17.66 1.41 1.41'/%3E%3Cpath d='M2 12h2'/%3E%3Cpath d='M20 12h2'/%3E%3Cpath d='m6.34 17.66-1.41 1.41'/%3E%3Cpath d='m19.07 4.93-1.41 1.41'/%3E%3C/svg%3E");
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <div class="header-title-group">
+                    <div class="header-title">
+                        <span class="icon icon-bird"></span>
+                        Bird-Friendly Garden Planner
+                    </div>
+                    <div class="header-subtitle">
+                        Roll a random bird and create a garden suited to its habitat needs
+                    </div>
+                </div>
+                <div class="theme-controls">
+                    <span class="icon icon-theme"></span>
+                    <select id="themeSelector" class="theme-selector">
+                        <option value="light">Light Theme</option>
+                        <option value="dark">Dark Theme</option>
+                        <option value="autumn">Autumn Theme</option>
+                        <option value="ocean">Ocean Theme</option>
+                    </select>
+                </div>
+            </div>
+        </header>
+
+        <div class="main-content">
+            <!-- Bird Selection Section -->
+            <div class="sidebar">
+                <div class="roll-button-container">
+                    <button id="rollButton" class="roll-button">
+                        Roll Random Bird
+                        <span class="icon icon-bird"></span>
+                    </button>
+                </div>
+
+                <div id="birdInfo" class="bird-info hidden">
+                    <div class="bird-header">
+                        <h2 id="birdName" class="bird-name">
+                            <span class="icon icon-bird"></span>
+                            <span id="birdNameText"></span>
+                        </h2>
+                        <p id="birdDescription" class="bird-description"></p>
+                    </div>
+
+                    <div class="tab-buttons">
+                        <button id="birdInfoTab" class="tab-button active">Bird Info</button>
+                        <button id="gardenTipsTab" class="tab-button">Garden Tips</button>
+                    </div>
+
+                    <div id="birdInfoContent" class="tab-content">
+                        <div class="bird-detail">
+                            <span class="icon icon-tree"></span>
+                            <div>
+                                <h3 class="detail-title">Habitat:</h3>
+                                <p id="birdHabitat"></p>
+                            </div>
+                        </div>
+                        
+                        <div class="bird-detail">
+                            <span class="icon icon-flower"></span>
+                            <div>
+                                <h3 class="detail-title">Diet:</h3>
+                                <p id="birdDiet"></p>
+                            </div>
+                        </div>
+                        
+                        <div class="bird-detail">
+                            <span class="icon icon-egg"></span>
+                            <div>
+                                <h3 class="detail-title">Nesting:</h3>
+                                <p id="birdNesting"></p>
+                            </div>
+                        </div>
+                        
+                        <div class="bird-detail">
+                            <span class="icon icon-water"></span>
+                            <div>
+                                <h3 class="detail-title">Water Needs:</h3>
+                                <p id="birdWater"></p>
+                            </div>
+                        </div>
+                        
+                        <div class="bird-detail">
+                            <span class="icon icon-plane"></span>
+                            <div>
+                                <h3 class="detail-title">Migration:</h3>
+                                <p id="birdMigration"></p>
+                            </div>
+                        </div>
+                        
+                        <div class="bird-detail">
+                            <span class="icon icon-map"></span>
+                            <div>
+                                <h3 class="detail-title">Range:</h3>
+                                <p id="birdRange"></p>
+                            </div>
+                        </div>
+                        
+                        <div class="bird-detail">
+                            <span class="icon icon-heart"></span>
+                            <div>
+                                <h3 class="detail-title">Personality:</h3>
+                                <p id="birdPersonality"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="gardenTipsContent" class="tab-content hidden">
+                        <h3 class="detail-title">Garden Tips for <span id="birdNameTips"></span>:</h3>
+                        <ul id="birdGardenTips" class="garden-tips-list"></ul>
+                    </div>
+                    
+                    <div class="action-buttons">
+                        <button id="savePlanButton" class="save-button">
+                            <span class="icon icon-save"></span>
+                            Save Garden Plan
+                        </button>
+                    </div>
+                    
+                    <div id="savedPlansSection" class="saved-plans-section hidden">
+                        <h3 class="detail-title">Saved Garden Plans</h3>
+                        <div id="savedPlansList">
+                            <!-- Saved plans will be populated here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Garden Planning Section -->
+            <div class="main-panel">
+                <div class="garden-elements">
+                    <h2 class="garden-elements-title">Garden Elements</h2>
+                    
+                    <div id="gardenElementsContainer">
+                        <!-- Garden elements will be dynamically inserted here -->
+                    </div>
+                </div>
+
+                <!-- Garden Plan -->
+                <div class="garden-plan">
+                    <h2 class="garden-elements-title">
+                        <span class="icon icon-tree"></span>
+                        Your Garden Plan <span id="forBirdName"></span>
+                    </h2>
+                    
+                    <div id="emptyPlan" class="empty-plan">
+                        <p>Your garden plan is empty. Add elements from above to create a bird-friendly habitat.</p>
+                    </div>
+                    
+                    <div id="gardenPlanContainer"></div>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            Bird-Friendly Garden Planner - Create habitats that attract and support wild birds
+        </footer>
+    </div>
+
+    <!-- Cookie Banner -->
+    <div id="cookieBanner" class="cookie-banner hidden">
+        <div>
+            This site uses cookies to save your garden plans and preferences.
+        </div>
+        <button id="acceptCookiesButton" class="cookie-button">Accept</button>
+    </div>
+
+    <!-- Notification -->
+    <div id="notification" class="notification">
+        <span id="notificationText"></span>
+    </div>
+
+    <script>
+        // Bird database with characteristics and habitat requirements
+        const birdDatabase = [
+            {
+                name: "Northern Cardinal",
+                image: "cardinal",
+                description: "Vibrant red bird with distinctive crest and black face mask",
+                habitat: "Woodland edges, gardens, shrubby areas",
+                diet: "Seeds, fruits, insects",
+                nesting: "Dense shrubs, vines, low trees",
+                range: "Eastern/Central US",
+                migration: "Non-migratory",
+                waterNeeds: "Regular water source",
+                personalityTraits: ["Bold", "Territorial", "Vocal"],
+                gardenTips: [
+                    "Plant dense shrubs for nesting",
+                    "Provide sunflower seeds in feeders",
+                    "Include berry-producing plants",
+                    "Maintain brush piles for shelter"
+                ]
+            },
+            {
+                name: "American Goldfinch",
+                image: "goldfinch",
+                description: "Bright yellow bird with black wings and forehead",
+                habitat: "Open meadows, gardens, fields with thistle",
+                diet: "Seeds (especially thistle), some insects",
+                nesting: "Shrubs and small trees",
+                range: "Across North America",
+                migration: "Partial migrant",
+                waterNeeds: "Shallow water source",
+                personalityTraits: ["Social", "Acrobatic", "Cheerful"],
+                gardenTips: [
+                    "Plant native thistles and coneflowers",
+                    "Leave seed heads on plants in fall",
+                    "Provide nyjer/thistle feeders",
+                    "Include tall grasses and wildflowers"
+                ]
+            },
+            {
+                name: "Eastern Bluebird",
+                image: "bluebird",
+                description: "Sky-blue upperparts with rusty throat and breast",
+                habitat: "Open grasslands with scattered trees",
+                diet: "Insects, berries, fruits",
+                nesting: "Cavities, nesting boxes",
+                range: "Eastern/Central US",
+                migration: "Partial migrant",
+                waterNeeds: "Birdbath or shallow water",
+                personalityTraits: ["Gentle", "Family-oriented", "Territorial"],
+                gardenTips: [
+                    "Install bluebird nesting boxes",
+                    "Maintain open lawn areas for hunting",
+                    "Plant fruiting shrubs like dogwood",
+                    "Avoid pesticides to protect insect food sources"
+                ]
+            },
+            {
+                name: "Rufous Hummingbird",
+                image: "hummingbird",
+                description: "Small hummingbird with rusty-orange back and belly",
+                habitat: "Forests, gardens with nectar flowers",
+                diet: "Nectar, small insects",
+                nesting: "Tiny cup nests on tree branches",
+                range: "Western North America",
+                migration: "Long-distance migrant",
+                waterNeeds: "Misting water features",
+                personalityTraits: ["Aggressive", "Energetic", "Territorial"],
+                gardenTips: [
+                    "Plant tubular flowers in red and orange",
+                    "Install hummingbird feeders",
+                    "Create vertical layers of plants",
+                    "Provide small perching branches"
+                ]
+            },
+            {
+                name: "Black-capped Chickadee",
+                image: "chickadee",
+                description: "Small bird with black cap and bib, white cheeks",
+                habitat: "Deciduous and mixed forests, parks",
+                diet: "Insects, seeds, berries",
+                nesting: "Cavities in trees, birdhouses",
+                range: "Northern US and Canada",
+                migration: "Non-migratory",
+                waterNeeds: "Fresh water source",
+                personalityTraits: ["Curious", "Bold", "Intelligent"],
+                gardenTips: [
+                    "Include coniferous and deciduous trees",
+                    "Provide suet and black oil sunflower seeds",
+                    "Install chickadee-sized nest boxes",
+                    "Create brush piles for shelter"
+                ]
+            },
+            {
+                name: "American Robin",
+                image: "robin",
+                description: "Gray-brown bird with warm orange underparts",
+                habitat: "Lawns, parks, woodlands, gardens",
+                diet: "Earthworms, insects, fruits, berries",
+                nesting: "Trees, shrubs, on structures",
+                range: "Throughout North America",
+                migration: "Partial migrant",
+                waterNeeds: "Birdbath or shallow water",
+                personalityTraits: ["Adaptable", "Early riser", "Industrious"],
+                gardenTips: [
+                    "Maintain some open lawn areas",
+                    "Plant fruit-bearing trees and shrubs",
+                    "Provide platform bird baths",
+                    "Include trees for nesting sites"
+                ]
+            },
+            {
+                name: "Barn Swallow",
+                image: "swallow",
+                description: "Dark blue-black above with rusty throat and forehead",
+                habitat: "Open areas near structures, farmland",
+                diet: "Flying insects",
+                nesting: "Mud nests on structures",
+                range: "North America, summer",
+                migration: "Long-distance migrant",
+                waterNeeds: "Mud puddles, water sources",
+                personalityTraits: ["Aerial acrobat", "Social", "Fast"],
+                gardenTips: [
+                    "Install nesting shelves under eaves",
+                    "Create mud puddles for nest building",
+                    "Avoid pesticides to protect insect populations",
+                    "Provide open flying space"
+                ]
+            },
+            {
+                name: "Cedar Waxwing",
+                image: "waxwing",
+                description: "Sleek, crested bird with subtle brown and yellow coloring",
+                habitat: "Woodland edges, orchards, gardens",
+                diet: "Fruits, berries, insects",
+                nesting: "Trees, preferably near water",
+                range: "North America",
+                migration: "Nomadic, following fruit sources",
+                waterNeeds: "Clean water source",
+                personalityTraits: ["Social", "Gentle", "Nomadic"],
+                gardenTips: [
+                    "Plant berry-producing trees and shrubs",
+                    "Include serviceberry, dogwood, and cedar",
+                    "Create vertical layers of vegetation",
+                    "Provide water features"
+                ]
+            },
+            {
+                name: "Baltimore Oriole",
+                image: "oriole",
+                description: "Brilliant orange and black with white wing bars",
+                habitat: "Open woodlands, river corridors, parklands",
+                diet: "Insects, fruits, nectar",
+                nesting: "Hanging pouch nests in tall trees",
+                range: "Eastern/Central North America",
+                migration: "Long-distance migrant",
+                waterNeeds: "Bird bath or water source",
+                personalityTraits: ["Colorful", "Musical", "Skilled nest builder"],
+                gardenTips: [
+                    "Plant tall deciduous trees like elms",
+                    "Include fruit-bearing plants like cherries",
+                    "Hang orange halves as feeders",
+                    "Plant nectar-rich flowers"
+                ]
+            },
+            {
+                name: "Dark-eyed Junco",
+                image: "junco",
+                description: "Slate-gray above with white belly and white outer tail feathers",
+                habitat: "Coniferous forests, woodland edges",
+                diet: "Seeds, insects",
+                nesting: "Ground or low shrubs",
+                range: "North America",
+                migration: "Altitudinal or short-distance migrant",
+                waterNeeds: "Ground-level water source",
+                personalityTraits: ["Ground forager", "Adaptable", "Social"],
+                gardenTips: [
+                    "Create ground-level bird baths",
+                    "Include coniferous trees and shrubs",
+                    "Scatter seed on ground feeding areas",
+                    "Leave leaf litter in some areas"
+                ]
+            },
+            {
+                name: "Downy Woodpecker",
+                image: "woodpecker",
+                description: "Small woodpecker with black and white pattern, males have red patch",
+                habitat: "Woodlands, parks, residential areas",
+                diet: "Insects, some seeds and fruits",
+                nesting: "Tree cavities",
+                range: "Throughout North America",
+                migration: "Non-migratory",
+                waterNeeds: "Water source",
+                personalityTraits: ["Industrious", "Acrobatic", "Persistent"],
+                gardenTips: [
+                    "Leave dead tree snags when safe",
+                    "Install woodpecker nest boxes",
+                    "Provide suet feeders",
+                    "Plant native trees and shrubs"
+                ]
+            },
+            {
+                name: "Purple Martin",
+                image: "martin",
+                description: "Large swallow, males are glossy blue-black",
+                habitat: "Open areas near water",
+                diet: "Flying insects",
+                nesting: "Colonial nest boxes",
+                range: "Eastern and Central North America",
+                migration: "Long-distance migrant",
+                waterNeeds: "Nearby water source",
+                personalityTraits: ["Social", "Colonial", "Aerial"],
+                gardenTips: [
+                    "Install purple martin houses in open areas",
+                    "Locate near water if possible",
+                    "Maintain open flying space",
+                    "Avoid pesticides to protect insect populations"
+                ]
+            }
+        ];
+
+        // Garden element database
+        const gardenElements = [
+            {
+                category: "Trees",
+                items: [
+                    { name: "Oak", benefits: ["Provides habitat for many birds", "Acorns for food"], zones: "3-9" },
+                    { name: "Pine", benefits: ["Evergreen shelter", "Seeds for finches and chickadees"], zones: "3-8" },
+                    { name: "Maple", benefits: ["Nesting sites", "Attracts insects for food"], zones: "3-9" },
+                    { name: "Dogwood", benefits: ["Berries for birds", "Nesting sites"], zones: "5-9" },
+                    { name: "Crabapple", benefits: ["Persistent fruit for winter", "Spring blossoms attract insects"], zones: "4-8" },
+                    { name: "Birch", benefits: ["Seeds for finches", "Attracts insects in bark"], zones: "2-7" }
+                ]
+            },
+            {
+                category: "Shrubs",
+                items: [
+                    { name: "Serviceberry", benefits: ["Berries for birds", "Early season food"], zones: "3-9" },
+                    { name: "Elderberry", benefits: ["Abundant berries", "Attracts insects"], zones: "3-9" },
+                    { name: "Holly", benefits: ["Winter berries", "Dense shelter"], zones: "5-9" },
+                    { name: "Viburnum", benefits: ["Berries", "Nesting sites"], zones: "2-9" },
+                    { name: "Arrowwood", benefits: ["Fall berries", "Dense cover"], zones: "3-8" },
+                    { name: "Juniper", benefits: ["Evergreen cover", "Berries"], zones: "3-9" }
+                ]
+            },
+            {
+                category: "Perennials",
+                items: [
+                    { name: "Coneflower", benefits: ["Seeds for finches", "Attracts insects"], zones: "3-9" },
+                    { name: "Bee Balm", benefits: ["Nectar for hummingbirds", "Seeds for finches"], zones: "4-9" },
+                    { name: "Black-eyed Susan", benefits: ["Seeds for songbirds", "Attracts insects"], zones: "3-9" },
+                    { name: "Salvia", benefits: ["Nectar for hummingbirds", "Long blooming season"], zones: "4-9" },
+                    { name: "Sunflower", benefits: ["Seeds for many birds", "Attracts insects"], zones: "3-9" },
+                    { name: "Aster", benefits: ["Late season nectar", "Seeds for birds"], zones: "3-8" }
+                ]
+            },
+            {
+                category: "Water Features",
+                items: [
+                    { name: "Bird Bath", benefits: ["Drinking water", "Bathing area"], zones: "All" },
+                    { name: "Small Pond", benefits: ["Attracts insects", "Water source"], zones: "All" },
+                    { name: "Fountain", benefits: ["Moving water attracts birds", "Sound mask"], zones: "All" },
+                    { name: "Mister", benefits: ["Attracts hummingbirds", "Creates humidity"], zones: "All" },
+                    { name: "Rain Garden", benefits: ["Attracts insects", "Natural water filtration"], zones: "All" },
+                    { name: "Puddling Area", benefits: ["Mud for nest building", "Mineral source"], zones: "All" }
+                ]
+            },
+            {
+                category: "Structures",
+                items: [
+                    { name: "Nest Box", benefits: ["Nesting sites for cavity-nesters", "Protection from predators"], zones: "All" },
+                    { name: "Brush Pile", benefits: ["Shelter from predators", "Foraging area"], zones: "All" },
+                    { name: "Snag (Dead Tree)", benefits: ["Insects for food", "Natural cavities"], zones: "All" },
+                    { name: "Bird Feeder", benefits: ["Supplemental food source", "Observation point"], zones: "All" },
+                    { name: "Nesting Shelf", benefits: ["Platform for open-nesting birds", "Protected location"], zones: "All" },
+                    { name: "Bat House", benefits: ["Insect control", "Complementary wildlife"], zones: "All" }
+                ]
+            }
+        ];
+
+        // Global variables
+        let selectedBird = null;
+        let gardenPlan = [];
+        let savedPlans = [];
+        let cookiesAccepted = false;
+
+        // DOM elements
+        const rollButton = document.getElementById('rollButton');
+        const birdInfoElement = document.getElementById('birdInfo');
+        const birdNameText = document.getElementById('birdNameText');
+        const birdDescription = document.getElementById('birdDescription');
+        const birdHabitat = document.getElementById('birdHabitat');
+        const birdDiet = document.getElementById('birdDiet');
+        const birdNesting = document.getElementById('birdNesting');
+        const birdWater = document.getElementById('birdWater');
+        const birdMigration = document.getElementById('birdMigration');
+        const birdRange = document.getElementById('birdRange');
+        const birdPersonality = document.getElementById('birdPersonality');
+        const birdNameTips = document.getElementById('birdNameTips');
+        const birdGardenTips = document.getElementById('birdGardenTips');
+        const forBirdName = document.getElementById('forBirdName');
+        const birdInfoTab = document.getElementById('birdInfoTab');
+        const gardenTipsTab = document.getElementById('gardenTipsTab');
+        const birdInfoContent = document.getElementById('birdInfoContent');
+        const gardenTipsContent = document.getElementById('gardenTipsContent');
+        const gardenElementsContainer = document.getElementById('gardenElementsContainer');
+        const gardenPlanContainer = document.getElementById('gardenPlanContainer');
+        const emptyPlan = document.getElementById('emptyPlan');
+        const savePlanButton = document.getElementById('savePlanButton');
+        const savedPlansSection = document.getElementById('savedPlansSection');
+        const savedPlansList = document.getElementById('savedPlansList');
+        const themeSelector = document.getElementById('themeSelector');
+        const cookieBanner = document.getElementById('cookieBanner');
+        const acceptCookiesButton = document.getElementById('acceptCookiesButton');
+        const notification = document.getElementById('notification');
+        const notificationText = document.getElementById('notificationText');
+
+        // Event listeners
+        rollButton.addEventListener('click', rollRandomBird);
+        birdInfoTab.addEventListener('click', () => switchTab('info'));
+        gardenTipsTab.addEventListener('click', () => switchTab('tips'));
+        savePlanButton.addEventListener('click', savePlan);
+        themeSelector.addEventListener('change', changeTheme);
+        acceptCookiesButton.addEventListener('click', acceptCookies);
+
+        // Initialize
+        init();
+
+        // Functions
+        function init() {
+            // Check for cookies consent
+            checkCookiesConsent();
+            
+            // Load saved theme
+            loadTheme();
+            
+            // Load saved plans if cookies are accepted
+            if (cookiesAccepted) {
+                loadSavedPlans();
+            }
+            
+            // Initialize garden elements
+            initializeGardenElements();
+        }
+
+        function checkCookiesConsent() {
+            // Check if the user has already accepted cookies
+            const consent = getCookie('cookiesAccepted');
+            if (consent === 'true') {
+                cookiesAccepted = true;
+            } else {
+                // Show cookie banner
+                cookieBanner.classList.remove('hidden');
+            }
+        }
+
+        function acceptCookies() {
+            cookiesAccepted = true;
+            setCookie('cookiesAccepted', 'true', 365); // Set cookie for 1 year
+            cookieBanner.classList.add('hidden');
+            
+            // Load saved plans after consent
+            loadSavedPlans();
+            
+            showNotification('Cookies accepted! Your preferences will be saved.');
+        }
+
+        function setCookie(name, value, days) {
+            const date = new Date();
+            date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+            const expires = "expires=" + date.toUTCString();
+            document.cookie = name + "=" + value + ";" + expires + ";path=/";
+        }
+
+        function getCookie(name) {
+            const cname = name + "=";
+            const decodedCookie = decodeURIComponent(document.cookie);
+            const ca = decodedCookie.split(';');
+            for (let i = 0; i < ca.length; i++) {
+                let c = ca[i];
+                while (c.charAt(0) === ' ') {
+                    c = c.substring(1);
+                }
+                if (c.indexOf(cname) === 0) {
+                    return c.substring(cname.length, c.length);
+                }
+            }
+            return "";
+        }
+
+        function loadTheme() {
+            // Check local storage for saved theme
+            const savedTheme = localStorage.getItem('birdGardenTheme');
+            if (savedTheme) {
+                applyTheme(savedTheme);
+                themeSelector.value = savedTheme;
+            }
+        }
+
+        function changeTheme(event) {
+            const theme = event.target.value;
+            applyTheme(theme);
+            
+            // Save theme preference if cookies accepted
+            if (cookiesAccepted) {
+                localStorage.setItem('birdGardenTheme', theme);
+            }
+        }
+
+        function applyTheme(theme) {
+            // Remove any existing theme classes
+            document.body.classList.remove('light-theme', 'dark-theme', 'autumn-theme', 'ocean-theme');
+            
+            // Apply selected theme
+            if (theme !== 'light') {
+                document.body.classList.add(`${theme}-theme`);
+            }
+        }
+
+        function showNotification(message) {
+            notificationText.textContent = message;
+            notification.classList.add('show');
+            
+            // Hide notification after 3 seconds
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        function rollRandomBird() {
+            rollButton.disabled = true;
+            rollButton.textContent = 'Rolling...';
+            
+            // Animation effect for rolling
+            let counter = 0;
+            const max = 10;
+            const interval = setInterval(() => {
+                const randomIndex = Math.floor(Math.random() * birdDatabase.length);
+                displayBirdInfo(birdDatabase[randomIndex]);
+                counter++;
+                
+                if (counter >= max) {
+                    clearInterval(interval);
+                    rollButton.disabled = false;
+                    rollButton.innerHTML = 'Roll Random Bird <span class="icon icon-bird"></span>';
+                    
+                    // Set the final selected bird
+                    selectedBird = birdDatabase[randomIndex];
+                    displayBirdInfo(selectedBird);
+                    updateGardenPlanTitle();
+                }
+            }, 100);
+        }
+
+        function displayBirdInfo(bird) {
+            // Show the bird info section
+            birdInfoElement.classList.remove('hidden');
+            
+            // Update bird info
+            birdNameText.textContent = bird.name;
+            birdDescription.textContent = bird.description;
+            birdHabitat.textContent = bird.habitat;
+            birdDiet.textContent = bird.diet;
+            birdNesting.textContent = bird.nesting;
+            birdWater.textContent = bird.waterNeeds;
+            birdMigration.textContent = bird.migration;
+            birdRange.textContent = bird.range;
+            birdPersonality.textContent = bird.personalityTraits.join(", ");
+            
+            // Update garden tips
+            birdNameTips.textContent = bird.name;
+            birdGardenTips.innerHTML = '';
+            bird.gardenTips.forEach(tip => {
+                const li = document.createElement('li');
+                li.textContent = tip;
+                birdGardenTips.appendChild(li);
+            });
+        }
+
+        function switchTab(tab) {
+            if (tab === 'info') {
+                birdInfoTab.classList.add('active');
+                gardenTipsTab.classList.remove('active');
+                birdInfoContent.classList.remove('hidden');
+                gardenTipsContent.classList.add('hidden');
+            } else {
+                birdInfoTab.classList.remove('active');
+                gardenTipsTab.classList.add('active');
+                birdInfoContent.classList.add('hidden');
+                gardenTipsContent.classList.remove('hidden');
+            }
+        }
+
+        function initializeGardenElements() {
+            gardenElementsContainer.innerHTML = '';
+            
+            gardenElements.forEach(category => {
+                const categorySection = document.createElement('div');
+                categorySection.className = 'category-section';
+                
+                const categoryTitle = document.createElement('h3');
+                categoryTitle.className = 'category-title';
+                categoryTitle.textContent = category.category;
+                categorySection.appendChild(categoryTitle);
+                
+                const elementsGrid = document.createElement('div');
+                elementsGrid.className = 'elements-grid';
+                
+                category.items.forEach(item => {
+                    const elementCard = createElementCard(item, category.category);
+                    elementsGrid.appendChild(elementCard);
+                });
+                
+                categorySection.appendChild(elementsGrid);
+                gardenElementsContainer.appendChild(categorySection);
+            });
+        }
+
+        function createElementCard(item, category) {
+            const card = document.createElement('div');
+            card.className = 'element-card';
+            
+            const cardHeader = document.createElement('div');
+            cardHeader.className = 'card-header';
+            
+            const elementName = document.createElement('h4');
+            elementName.className = 'element-name';
+            elementName.textContent = item.name;
+            
+            const addButton = document.createElement('button');
+            addButton.className = 'add-button';
+            addButton.innerHTML = '+';
+            addButton.addEventListener('click', () => addToGarden(item, category));
+            
+            cardHeader.appendChild(elementName);
+            cardHeader.appendChild(addButton);
+            
+            const elementZones = document.createElement('p');
+            elementZones.className = 'element-zones';
+            elementZones.textContent = `Zones: ${item.zones}`;
+            
+            const benefitsList = document.createElement('ul');
+            benefitsList.className = 'benefits-list';
+            
+            item.benefits.forEach(benefit => {
+                const benefitItem = document.createElement('li');
+                benefitItem.className = 'benefit-item';
+                
+                const bullet = document.createElement('span');
+                bullet.className = 'benefit-bullet';
+                bullet.textContent = '•';
+                
+                benefitItem.appendChild(bullet);
+                benefitItem.appendChild(document.createTextNode(' ' + benefit));
+                benefitsList.appendChild(benefitItem);
+            });
+            
+            card.appendChild(cardHeader);
+            card.appendChild(elementZones);
+            card.appendChild(benefitsList);
+            
+            return card;
+        }
+
+        function addToGarden(item, category) {
+            const newItem = { ...item, category, id: Date.now() };
+            gardenPlan.push(newItem);
+            updateGardenPlan();
+            showNotification(`Added ${item.name} to your garden plan!`);
+        }
+
+        function removeFromGarden(id) {
+            const itemToRemove = gardenPlan.find(item => item.id === id);
+            gardenPlan = gardenPlan.filter(item => item.id !== id);
+            updateGardenPlan();
+            showNotification(`Removed ${itemToRemove.name} from your garden plan.`);
+        }
+
+        function updateGardenPlan() {
+            if (gardenPlan.length === 0) {
+                emptyPlan.classList.remove('hidden');
+                gardenPlanContainer.innerHTML = '';
+                return;
+            }
+            
+            emptyPlan.classList.add('hidden');
+            gardenPlanContainer.innerHTML = '';
+            
+            // Group by category
+            const categories = ['Trees', 'Shrubs', 'Perennials', 'Water Features', 'Structures'];
+            
+            categories.forEach(category => {
+                const categoryItems = gardenPlan.filter(item => item.category === category);
+                if (categoryItems.length === 0) return;
+                
+                const categorySection = document.createElement('div');
+                categorySection.className = 'category-section';
+                
+                const categoryTitle = document.createElement('h3');
+                categoryTitle.className = 'category-title';
+                categoryTitle.textContent = category;
+                categorySection.appendChild(categoryTitle);
+                
+                const elementsGrid = document.createElement('div');
+                elementsGrid.className = 'elements-grid';
+                
+                categoryItems.forEach(item => {
+                    const card = document.createElement('div');
+                    card.className = 'element-card';
+                    
+                    const cardHeader = document.createElement('div');
+                    cardHeader.className = 'card-header';
+                    
+                    const elementName = document.createElement('h4');
+                    elementName.className = 'element-name';
+                    elementName.textContent = item.name;
+                    
+                    const removeButton = document.createElement('button');
+                    removeButton.className = 'remove-button';
+                    removeButton.innerHTML = '×';
+                    removeButton.addEventListener('click', () => removeFromGarden(item.id));
+                    
+                    cardHeader.appendChild(elementName);
+                    cardHeader.appendChild(removeButton);
+                    
+                    const elementZones = document.createElement('p');
+                    elementZones.className = 'element-zones';
+                    elementZones.textContent = `Zones: ${item.zones}`;
+                    
+                    card.appendChild(cardHeader);
+                    card.appendChild(elementZones);
+                    
+                    elementsGrid.appendChild(card);
+                });
+                
+                categorySection.appendChild(elementsGrid);
+                gardenPlanContainer.appendChild(categorySection);
+            });
+        }
+
+        function updateGardenPlanTitle() {
+            if (selectedBird) {
+                forBirdName.textContent = ` for ${selectedBird.name}`;
+            } else {
+                forBirdName.textContent = '';
+            }
+        }
+
+        function savePlan() {
+            if (!selectedBird || gardenPlan.length === 0) {
+                showNotification('Cannot save an empty garden plan. Add some elements first!');
+                return;
+            }
+            
+            // Create plan object to save
+            const plan = {
+                id: Date.now(),
+                date: new Date().toLocaleDateString(),
+                birdName: selectedBird.name,
+                elements: gardenPlan
+            };
+            
+            // Add to saved plans
+            savedPlans.push(plan);
+            
+            // Save to localStorage if cookies accepted
+            if (cookiesAccepted) {
+                localStorage.setItem('birdGardenPlans', JSON.stringify(savedPlans));
+            }
+            
+            // Update UI
+            updateSavedPlansDisplay();
+            showNotification(`Garden plan for ${selectedBird.name} saved successfully!`);
+        }
+
+        function loadSavedPlans() {
+            const savedPlansJSON = localStorage.getItem('birdGardenPlans');
+            if (savedPlansJSON) {
+                savedPlans = JSON.parse(savedPlansJSON);
+                updateSavedPlansDisplay();
+            }
+        }
+
+        function updateSavedPlansDisplay() {
+            if (savedPlans.length === 0) {
+                savedPlansSection.classList.add('hidden');
+                return;
+            }
+            
+            savedPlansSection.classList.remove('hidden');
+            savedPlansList.innerHTML = '';
+            
+            savedPlans.forEach(plan => {
+                const planItem = document.createElement('div');
+                planItem.className = 'saved-plan-item';
+                
+                const planInfo = document.createElement('div');
+                planInfo.innerHTML = `<strong>${plan.birdName}</strong> - ${plan.date} (${plan.elements.length} elements)`;
+                
+                const planActions = document.createElement('div');
+                planActions.className = 'saved-plan-actions';
+                
+                const loadButton = document.createElement('button');
+                loadButton.className = 'plan-action-button';
+                loadButton.innerHTML = '<span class="icon icon-load"></span>';
+                loadButton.title = 'Load plan';
+                loadButton.addEventListener('click', () => loadPlan(plan.id));
+                
+                const deleteButton = document.createElement('button');
+                deleteButton.className = 'plan-action-button plan-delete-button';
+                deleteButton.innerHTML = '<span class="icon icon-delete"></span>';
+                deleteButton.title = 'Delete plan';
+                deleteButton.addEventListener('click', () => deletePlan(plan.id));
+                
+                planActions.appendChild(loadButton);
+                planActions.appendChild(deleteButton);
+                
+                planItem.appendChild(planInfo);
+                planItem.appendChild(planActions);
+                
+                savedPlansList.appendChild(planItem);
+            });
+        }
+
+        function loadPlan(planId) {
+            const plan = savedPlans.find(p => p.id === planId);
+            if (!plan) return;
+            
+            // Find the bird in the database
+            const bird = birdDatabase.find(b => b.name === plan.birdName);
+            if (!bird) return;
+            
+            // Load the bird and plan
+            selectedBird = bird;
+            gardenPlan = [...plan.elements];
+            
+            // Update UI
+            displayBirdInfo(bird);
+            updateGardenPlan();
+            updateGardenPlanTitle();
+            
+            showNotification(`Loaded garden plan for ${bird.name}`);
+        }
+
+        function deletePlan(planId) {
+            const planIndex = savedPlans.findIndex(p => p.id === planId);
+            if (planIndex === -1) return;
+            
+            const plan = savedPlans[planIndex];
+            savedPlans.splice(planIndex, 1);
+            
+            // Update localStorage if cookies accepted
+            if (cookiesAccepted) {
+                localStorage.setItem('birdGardenPlans', JSON.stringify(savedPlans));
+            }
+            
+            // Update UI
+            updateSavedPlansDisplay();
+            showNotification(`Deleted garden plan for ${plan.birdName}`);
+        }
+    </script>
+</body>
+</html>
